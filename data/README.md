@@ -1,10 +1,23 @@
 # Data
 
-The puzzle data is **not** stored in this repository — it is ~100 GB of images and
-ground truth, hosted on the Hugging Face Hub.
+The puzzle data is **not** stored in this repository — it is hosted on the Hugging Face
+Hub under CC BY 4.0:
 
 ```
-https://huggingface.co/datasets/ZHEN-04/Captcha
+https://huggingface.co/datasets/ZHEN-04/CaptchaArena
+```
+
+## Download
+
+```bash
+pip install -U huggingface_hub
+
+# everything
+huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
+
+# or a single split
+huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset \
+  --include "Test/*" --local-dir data
 ```
 
 ## Layout expected by the code
@@ -14,11 +27,13 @@ https://huggingface.co/datasets/ZHEN-04/Captcha
 
 ```
 data/
-├── Train/<Type>_2100/         # ground_truth.json, ground_truth_cu.json, *.png
+├── Train/<Type>_2100/    # ground_truth.json, ground_truth_cu.json, images
 ├── Val/<Type>_200/
-├── Test/<Type>_200/
-└── Validation/<Type>/         # hand-curated split, bare type names (no count suffix)
+└── Test/<Type>_200/
 ```
+
+The `_<count>` suffix is part of the directory name and part of the `puzzle_type` the API
+expects — `Test/Bingo_200`, not `Test/Bingo`.
 
 Each puzzle directory holds the images plus two ground-truth files:
 
@@ -26,24 +41,10 @@ Each puzzle directory holds the images plus two ground-truth files:
 - `ground_truth_cu.json` — the same answers as explicit computer-use tool-call
   sequences (`answer_cu`), which is what the agent and the mock replay execute
 
-## Download
-
-```bash
-pip install huggingface_hub
-huggingface-cli login          # the dataset is private; ask the authors for access
-
-# everything (~100 GB)
-huggingface-cli download ZHEN-04/Captcha --repo-type dataset --local-dir data
-
-# or a single split
-huggingface-cli download ZHEN-04/Captcha --repo-type dataset \
-  --include "Validation/*" --local-dir data
-```
-
 Then run the server against it:
 
 ```bash
-CAPTCHA_DATA_DIRS=data/Validation python app.py     # :7860
+CAPTCHA_DATA_DIRS=data/Test python app.py     # :7860
 ```
 
 ## Note on coordinates

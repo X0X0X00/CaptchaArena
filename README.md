@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
-  <a href="https://huggingface.co/datasets/ZHEN-04/Captcha"><img src="https://img.shields.io/badge/🤗%20Dataset-CaptchaArena-yellow" alt="Dataset"></a>
+  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Dataset-CaptchaArena-yellow" alt="Dataset"></a>
 </p>
 
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
@@ -26,6 +26,7 @@ a whole split can be replayed and verified without ever calling a model.
 - [Getting the data](#getting-the-data)
 - [Running it](#running-it)
 - [Browsing the dataset](#browsing-the-dataset)
+- [Release status](#release-status)
 - [License](#license)
 - [Credits](#credits)
 
@@ -138,11 +139,11 @@ The server and the agent both run on Python 3.10+.
 
 Images and ground truth live on the Hugging Face Hub:
 
-**https://huggingface.co/datasets/ZHEN-04/Captcha**
+**https://huggingface.co/datasets/ZHEN-04/CaptchaArena**
 
 ```bash
 pip install -U huggingface_hub
-huggingface-cli download ZHEN-04/Captcha --repo-type dataset --local-dir data
+huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 ```
 
 | Split | Per type | Total |
@@ -215,9 +216,28 @@ its ground truth, so you can try it yourself under exactly the conditions an age
 
 ![A puzzle opened on its live page, with the ground truth beside it](assets/gallery_live.jpg)
 
+## Release status
+
+What is out, and what is still coming.
+
+- [x] **Benchmark and agent** — this repository: the server, the 20 puzzle families, the
+      screenshot agent, the dataset gallery and the trajectory viewer.
+- [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
+      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) under CC BY 4.0.
+- [ ] **SFT data** — the distilled trajectories we fine-tune on, split one sample per
+      turn, in plain and reasoning-annotated variants.
+- [ ] **Model weights** — the fine-tuned checkpoints.
+- [ ] **Training code** — supervised fine-tuning, plus the multi-turn RL setup that
+      drives this environment as a live rollout target.
+- [ ] **Puzzle generators** — the scripts that render each family, for anyone who wants
+      more data than the shipped splits, or a new puzzle type.
+- [ ] **Human baseline** — annotators solving the whole `Test` split through this same
+      page, so agent scores have something to be measured against.
+- [ ] **Paper**, and the baseline numbers that belong with it.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). The dataset is released separately under CC BY 4.0.
 
 ## Credits
 
