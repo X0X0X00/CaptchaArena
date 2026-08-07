@@ -49,8 +49,11 @@ So CaptchaArena keeps the page:
   metadata, no DOM, and no benchmark API.
 - **Graded by the page.** Correctness comes from `/api/check_answer`, the same endpoint a
   human clicking Submit goes through. There is no separate offline scorer to drift from.
-- **Multi-step by nature.** Solutions run from one action to nine, so a score reflects
-  perception, grounding *and* ordering rather than a single guess.
+- **Multi-step by nature.** Reference solutions run from one action to 22. Seventeen of
+  the twenty categories need at most six; `Unusual_Detection` and `Rotation_Match` reach
+  seven and eight; `Patch_Select` is the long tail, with a median of 8 and a 90th
+  percentile of 12. A score therefore reflects perception, grounding *and* ordering
+  rather than a single guess.
 
 ## The 20 puzzle types
 
