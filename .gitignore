@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / web viewer
+node_modules/
+web/dist/
+
+# Local config and logs
+.env
+*.log
+benchmark_results.json
+
+# Dataset — downloaded from Hugging Face, see data/README.md
+/data/*
+!/data/README.md
+
+# Agent run outputs
+/data/Output/
+runs/
+
+# Gallery thumbnail cache
+/tmp/captcha_arena_thumbs/
+
+# Editor / stray backups
+*.before_*
+*.bak
+*.orig

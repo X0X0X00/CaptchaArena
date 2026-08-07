@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAPTCHA Human Study · {{ store }}</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0f172a; color: #e2e8f0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  #bar { height: 56px; display: flex; align-items: center; gap: 18px; padding: 0 18px;
+    background: #1e293b; border-bottom: 1px solid #334155; }
+  #bar .store { font-weight: 700; font-size: 15px; background:#334155; padding:4px 10px; border-radius:6px; }
+  #bar .type { font-weight: 600; font-size: 15px; }
+  #bar .nums { font-size: 13px; color:#94a3b8; }
+  #bar .nums b { color:#e2e8f0; }
+  #flash { margin-left:auto; font-weight:700; font-size:15px; padding:5px 14px; border-radius:6px;
+    opacity:0; transition:opacity .12s; }
+  #flash.ok { background:#065f46; color:#d1fae5; opacity:1; }
+  #flash.no { background:#7f1d1d; color:#fee2e2; opacity:1; }
+  #progwrap { position:absolute; top:56px; left:0; right:0; height:4px; background:#1e293b; }
+  #prog { height:100%; width:0; background:#38bdf8; transition:width .3s; }
+  #stagewrap { position:absolute; top:60px; left:0; right:0; bottom:0;
+    display:flex; align-items:flex-start; justify-content:center; padding:12px; }
+  #stage { position:relative; overflow:hidden; background:#fff; border-radius:8px;
+    box-shadow:0 8px 30px rgba(0,0,0,.4); }
+  #frame { width:1280px; height:1080px; border:0; transform-origin:top left; display:block; }
+  #done { position:absolute; inset:0; display:none; flex-direction:column; align-items:center;
+    justify-content:center; text-align:center; gap:10px; }
+  #done h1 { font-size:34px; margin:0; }
+  #done p { color:#94a3b8; margin:0; }
+</style>
+</head>
+<body>
+  <div id="bar">
+    <span class="store">Person {{ store }}</span>
+    <span class="type" id="curType">Loading…</span>
+    <span class="nums">Done <b id="doneN">0</b>/<b>{{ total }}</b></span>
+    <span class="nums">Correct <b id="corrN">0</b> (<b id="accN">0%</b>)</span>
+    <span id="flash"></span>
+  </div>
+  <div id="progwrap"><div id="prog"></div></div>
+  <div id="stagewrap">
+    <div id="stage">
+      <iframe id="frame" title="captcha" scrolling="no"></iframe>
+    </div>
+  </div>
+  <div id="done">
+    <h1>🎉 All done</h1>
+    <p>Person {{ store }} finished all {{ total }} puzzles. Thank you!</p>
+  </div>
+
+<script>
+  const SPLIT = "{{ split }}", TOTAL = {{ total }}, STORE = "{{ store }}";
+  const $ = (id) => document.getElementById(id);
+  const frame = $("frame"), stage = $("stage"), bar = $("bar");
+  let current = null, done = 0, correct = 0, advancing = false;
+
+  function baseType(t) { return (t || "").replace(/_\d+$/, ""); }
+
+  function fit() {
+    const availW = window.innerWidth - 24;
+    const availH = window.innerHeight - bar.offsetHeight - 24;
+    const s = Math.min(1, availW / 1280, availH / 1080);
+    stage.style.width = Math.round(1280 * s) + "px";
+    stage.style.height = Math.round(1080 * s) + "px";
+    frame.style.transform = "scale(" + s + ")";
+  }
+  window.addEventListener("resize", fit);
+
+  function updateHeader() {
+    $("doneN").textContent = done;
+    $("corrN").textContent = correct;
+    $("accN").textContent = (done ? ((correct / done) * 100).toFixed(1) : "0") + "%";
+    $("prog").style.width = (TOTAL ? (done / TOTAL) * 100 : 0) + "%";
+    if (current) $("curType").textContent = baseType(current.puzzle_type) + " · #" + (current.idx + 1);
+  }
+
+  function flash(ok) {
+    const f = $("flash");
+    f.className = ok ? "ok" : "no";
+    f.textContent = ok ? "✓ Correct" : "✗ Wrong";
+  }
+  function clearFlash() { $("flash").className = ""; $("flash").textContent = ""; }
+
+  function puzzleUrl(item) {
+    const p = new URLSearchParams({
+      single_puzzle: "true", study: "1", split: SPLIT,
+      puzzle_type: item.puzzle_type, puzzle_id: item.puzzle_id,
+    });
+    return "/?" + p.toString();
+  }
+
+  function loadItem(item) {
+    if (!item) {
+      $("stagewrap").style.display = "none";
+      $("done").style.display = "flex";
+      $("curType").textContent = "Complete";
+      return;
+    }
+    current = item;
+    advancing = false;
+    clearFlash();
+    frame.src = puzzleUrl(item);
+    updateHeader();
+    fit();
+  }
+
+  window.addEventListener("message", async (e) => {
+    const d = e.data;
+    if (!d || d.source !== "captcha-study") return;
+    if (!current || advancing) return;
+    // Ignore stale messages that don't match the puzzle currently on screen.
+    if (d.puzzle_id !== current.puzzle_id || d.puzzle_type !== current.puzzle_type) return;
+    advancing = true;
+    flash(d.correct);
+    try {
+      const res = await fetch("/api/study/record", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idx: current.idx, puzzle_type: d.puzzle_type, puzzle_id: d.puzzle_id,
+          correct: d.correct, steps: d.steps, actions: d.actions, time_ms: d.time_ms,
+        }),
+      }).then((r) => r.json());
+      done = res.done; correct = res.correct;
+      updateHeader();
+      setTimeout(() => loadItem(res.next), 1200);
+    } catch (err) {
+      // On a record failure, let the tester retry: re-enable and keep the puzzle.
+      advancing = false;
+      $("flash").className = "no"; $("flash").textContent = "save failed — resubmit";
+    }
+  });
+
+  (async function init() {
+    try {
+      const s = await fetch("/api/study/state").then((r) => r.json());
+      done = s.done; correct = s.correct;
+      loadItem(s.next);
+    } catch (e) {
+      $("curType").textContent = "Failed to load study state — refresh.";
+    }
+  })();
+</script>
+</body>
+</html>

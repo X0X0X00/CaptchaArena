@@ -1,0 +1,9 @@
+flask
+werkzeug
+flask-cors
+pillow
+gunicorn
+playwright
+anthropic
+openai
+google-genai
