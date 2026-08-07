@@ -2,11 +2,13 @@
 
 **A benchmark for computer-use agents on interactive CAPTCHAs.**
 
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org)
-[![Dataset](https://img.shields.io/badge/🤗%20Dataset-CaptchaArena-yellow)](https://huggingface.co/datasets/ZHEN-04/Captcha)
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
+  <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
+  <a href="https://huggingface.co/datasets/ZHEN-04/Captcha"><img src="https://img.shields.io/badge/🤗%20Dataset-CaptchaArena-yellow" alt="Dataset"></a>
+</p>
 
-![The 20 puzzle types in CaptchaArena](assets/figure1.jpg)
+![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
 CaptchaArena serves 20 families of modern CAPTCHA as live web pages at a fixed
 1280x1080 viewport. An agent gets screenshots and nothing else; it answers by moving the
@@ -40,9 +42,10 @@ So CaptchaArena keeps the page:
 - **Rendered, not pre-baked.** Flask serves every puzzle and a real browser draws it at a
   locked 1280x1080 viewport, which is what makes pixel coordinates comparable between two
   models, or between the same model on two different days.
-- **Screenshot in, mouse out.** The agent's whole observation is a screenshot. Its whole
-  action space is `click`, `drag`, `hold`, `type_text`, `press_key`, `mouse_down/move/up`
-  and `screenshot`. It is given no puzzle metadata, no DOM, and no benchmark API.
+- **Screenshot in, mouse out.** The agent's whole observation is a screenshot, and its
+  whole action space is five tools — `screenshot`, `click`, `drag`, `type_text` and
+  `hold`. There is no `done`: submitting ends the episode. It is given no puzzle
+  metadata, no DOM, and no benchmark API.
 - **Graded by the page.** Correctness comes from `/api/check_answer`, the same endpoint a
   human clicking Submit goes through. There is no separate offline scorer to drift from.
 - **Multi-step by nature.** Solutions run from one action to nine, so a score reflects
@@ -50,19 +53,18 @@ So CaptchaArena keeps the page:
 
 ## The 20 puzzle types
 
-The instruction column is the literal text rendered on the page (some types draw their
-target from a pool — the count is in brackets). "Actions" is the mean length of the
-ground-truth solution measured over the `Test` split; the benchmark page shows the same
-number as a 1–5 star rating.
+The instruction column is the literal text rendered on the page. "Actions" is the mean
+length of the ground-truth solution measured over the `Test` split; the benchmark page
+shows the same number as a 1–5 star rating.
 
 | Type | Interaction | Instruction on the page | Actions |
 |---|---|---|---|
-| `Geometry_Click` | click | *Click on the letter z.* [35 targets] | 1.0 |
+| `Geometry_Click` | click | *Click on the cone.* | 1.0 |
 | `Hold_Button` | press and hold | *Hold the button until it finishes loading.* | 1.0 |
 | `Misleading_Click` | click | *Click the image to continue.* | 1.0 |
 | `Pick_Area` | click | *Click on the center of the largest area outlined by the dotted line* | 1.0 |
 | `Place_Dot` | click, submit | *Click to place a Dot at the end of the car's path* | 2.0 |
-| `Select_Animal` | click, submit | *Pick a pig* [95 animals] | 2.0 |
+| `Select_Animal` | click, submit | *Pick a rooster* | 2.0 |
 | `Object_Match` | arrow cycling | *Use the arrows to change the number of objects until it matches the left image.* | 2.8 |
 | `Coordinates` | arrow cycling | *Using the arrows, move Jerry to the indicated seat* | 2.8 |
 | `Bingo` | tile swap | *...click two images to exchange their position to line up the same images to a line* | 3.0 |
@@ -72,11 +74,11 @@ number as a 1–5 star rating.
 | `Connect_icon` | arrow cycling | *Using the arrows, connect the same two icons with the dotted line as shown on the left.* | 3.5 |
 | `Dart_Count` | arrow cycling | *Use the arrows to pick the image where all the darts add up to the number in the left image.* | 3.7 |
 | `Path_Finder` | arrow cycling | *Use the arrows to select the image where the object is on the spot marked by the X.* | 3.7 |
-| `Image_Recognition` | grid multi-select | *Select all images containing a bus, then click submit* [11 objects] | 4.4 |
+| `Image_Recognition` | grid multi-select | *Select all images containing a bicycle, then click submit* | 4.4 |
 | `Unusual_Detection` | grid multi-select | *Select all the unusual images* | 4.5 |
 | `Rotation_Match` | arrow cycling | *Use the arrows to rotate the object so it points in the same direction as the reference hand.* | 4.5 |
 | `Click_Order` | ordered clicks | *Click the icons in order as shown in the reference image.* | 5.1 |
-| `Patch_Select` | grid multi-select | *Select all squares with a vehicle* [80 objects] | 8.5 |
+| `Patch_Select` | grid multi-select | *Select all squares with garden trowel* | 8.5 |
 
 Seven of the types share one arrow-cycling widget: a left and a right button that page
 through candidate images. They look alike and behave alike, but the underlying decision —
