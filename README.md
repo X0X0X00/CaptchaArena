@@ -16,8 +16,16 @@ mouse and typing, and the page's own checker decides whether it was right. 50,00
 ship across `Train` / `Val` / `Test`, each one carrying a machine-executable solution, so
 a whole split can be replayed and verified without ever calling a model.
 
+## Updates
+
+- **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
+  gallery and the trajectory viewer.
+- **2026-08-07** — Dataset release: 50,000 puzzles across `Train` / `Val` / `Test`, on the
+  Hugging Face Hub under CC BY 4.0.
+
 ## Table of Contents
 
+- [Updates](#updates)
 - [Why a live page](#why-a-live-page)
 - [The 20 puzzle types](#the-20-puzzle-types)
 - [Ground truth](#ground-truth)
