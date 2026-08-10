@@ -76,18 +76,39 @@ def safe_join(*parts):
     return p
 
 
+GT_FILES = ("ground_truth.json", "ground_truth_cu.json")
+
+
 @lru_cache(maxsize=256)
-def load_gt(split, type_name):
-    """Return (ground_truth, ground_truth_cu) for a split/type, cached."""
+def _load_gt(split, type_name, _stamp):
+    """Parse the two ground-truth files. Keyed on _stamp so an edit invalidates."""
     d = safe_join(split, type_name)
     out = []
-    for fn in ("ground_truth.json", "ground_truth_cu.json"):
+    for fn in GT_FILES:
         try:
             with open(os.path.join(d, fn)) as f:
                 out.append(json.load(f))
         except Exception:
             out.append({})
     return out[0], out[1]
+
+
+def load_gt(split, type_name):
+    """Return (ground_truth, ground_truth_cu) for a split/type.
+
+    Cached, but keyed on the files' mtimes: ground truth gets corrected in place
+    (relabelling passes, regenerated splits), and a long-lived process must not
+    keep serving the answers it happened to read at startup.
+    """
+    d = safe_join(split, type_name)
+    stamp = []
+    for fn in GT_FILES:
+        try:
+            st = os.stat(os.path.join(d, fn))
+            stamp.append((int(st.st_mtime), st.st_size))
+        except OSError:
+            stamp.append(None)
+    return _load_gt(split, type_name, tuple(stamp))
 
 
 def n_actions(entry):
