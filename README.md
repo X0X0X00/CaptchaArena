@@ -8,6 +8,10 @@
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Puzzles-gated-orange" alt="Puzzles"></a>
 </p>
 
+<p align="center">
+  <b>English</b> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
 CaptchaArena serves 20 families of modern CAPTCHA as live web pages at a fixed
