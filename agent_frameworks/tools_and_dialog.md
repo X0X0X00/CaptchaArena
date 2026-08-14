@@ -161,7 +161,7 @@ After the entire run finishes, a `run_summary.json` is written at the `output_ro
 
 ```json
 {
-  "benchmark": "opencaptchaworld",
+  "benchmark": "captchaarena",
   "agent": "gemini-3.1-flash-lite-preview",
   "task_id": "Bingo_bingo13",
   "summary_info": {"cum_reward": 1.0},

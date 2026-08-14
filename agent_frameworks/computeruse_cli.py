@@ -1633,7 +1633,7 @@ async def _run_openai_loop(
 
         # 1. metafile.json (full thinking + actions)
         metafile = {
-            "benchmark": "opencaptchaworld",
+            "benchmark": "captchaarena",
             "agent": model.split("/")[-1],
             "task_id": f"{puzzle_type}_{puzzle_id}",
             "summary_info": {"cum_reward": reward},
@@ -1678,7 +1678,7 @@ async def _run_openai_loop(
     overall_accuracy = (total_correct / total_puzzles * 100) if total_puzzles else 0.0
 
     run_summary = {
-        "benchmark": "opencaptchaworld",
+        "benchmark": "captchaarena",
         "agent": model.split("/")[-1],
         "total_puzzles": total_puzzles,
         "total_submitted": total_submitted,
@@ -2207,7 +2207,7 @@ async def _run_mock_loop(
 
         # metafile.json + summary.json
         metafile = {
-            "benchmark": "opencaptchaworld",
+            "benchmark": "captchaarena",
             "agent": "mock-gt",
             "task_id": f"{puzzle_type}_{puzzle_id_stem}",
             "summary_info": {"cum_reward": reward},
@@ -2238,7 +2238,7 @@ async def _run_mock_loop(
     cor = sum(1 for s in all_summaries if s["correct"])
     (out_root / "run_summary.json").write_text(
         json.dumps({
-            "benchmark": "opencaptchaworld",
+            "benchmark": "captchaarena",
             "agent": "mock-gt",
             "total_puzzles": total,
             "total_submitted": sub,
@@ -2720,7 +2720,7 @@ async def _run_agent_per_puzzle(args: argparse.Namespace) -> int:
     overall_accuracy = (total_correct / total_puzzles * 100) if total_puzzles else 0.0
 
     run_summary = {
-        "benchmark": "opencaptchaworld",
+        "benchmark": "captchaarena",
         "agent": model.split("/")[-1],
         "mode": "per_puzzle",
         "total_puzzles": total_puzzles,
@@ -2755,7 +2755,7 @@ async def _run_agent_per_puzzle(args: argparse.Namespace) -> int:
         t_cor = sum(1 for s in summaries if s.get("correct"))
         t_acc = (t_cor / t_total * 100) if t_total else 0.0
         type_summary = {
-            "benchmark": "opencaptchaworld",
+            "benchmark": "captchaarena",
             "agent": model.split("/")[-1],
             "mode": "per_puzzle",
             "puzzle_type": ptype,
