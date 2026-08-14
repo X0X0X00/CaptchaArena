@@ -2497,9 +2497,14 @@ async def _run_single_puzzle(args: argparse.Namespace) -> int:
         await browser.close()
         await pw.stop()
 
-    # Read summary if saved
+    # Read summary if saved. The provider loops nest each puzzle under a
+    # lowercased type directory; older runs wrote it flat, so accept both.
     puzzle_id_stem = Path(puzzle_id).stem.replace("/", "_").replace(" ", "_")
-    summary_path = out_root / f"{puzzle_type}_{puzzle_id_stem}" / "summary.json"
+    leaf = f"{puzzle_type}_{puzzle_id_stem}"
+    puzzle_dir = out_root / puzzle_type.lower() / leaf
+    if not (puzzle_dir / "summary.json").exists():
+        puzzle_dir = out_root / leaf
+    summary_path = puzzle_dir / "summary.json"
     if summary_path.exists():
         try:
             summary = json.loads(summary_path.read_text(encoding='utf-8'))
@@ -2515,7 +2520,7 @@ async def _run_single_puzzle(args: argparse.Namespace) -> int:
         "submitted": submitted,
         "correct": correct,
         "reward": 1.0 if (submitted and correct) else 0.0,
-        "output_dir": str(out_root / f"{puzzle_type}_{puzzle_id_stem}"),
+        "output_dir": str(puzzle_dir),
     }, ensure_ascii=False))
 
     return 0 if correct else 1
