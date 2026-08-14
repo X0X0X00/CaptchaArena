@@ -639,16 +639,15 @@ GEMINI_TOOL_DECLARATIONS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Prompt
 #
-# NOTE: the system prompts below still say "OpenCaptchaWorld" — do not rename them.
-# They are reproduced byte-for-byte in the SFT training data, so any edit makes the
-# prompt a fine-tuned model was trained on differ from the one it is served, which
-# silently degrades results instead of failing loudly.
+# NOTE: these strings are part of the train/serve contract, not just labels. A model
+# fine-tuned against one wording and served with another degrades silently rather than
+# failing, so if you retrain, keep the trained prompt and this one byte-identical.
 # ---------------------------------------------------------------------------
 
 def _build_system_prompt(url: str, limit: int, width: int, height: int) -> str:
     """System prompt shared across all providers."""
     return textwrap.dedent(f"""\
-        You are a Computer-Use agent evaluating CAPTCHA puzzles on the OpenCaptchaWorld benchmark.
+        You are a Computer-Use agent evaluating CAPTCHA puzzles on the CaptchaArena benchmark.
 
         The browser is open at {url} with a viewport of {width}x{height} pixels.
         You can see the page via screenshots and interact by clicking, typing, scrolling, or dragging.
@@ -681,7 +680,7 @@ def _build_system_prompt(url: str, limit: int, width: int, height: int) -> str:
 def _build_single_puzzle_system_prompt(url: str, width: int, height: int) -> str:
     """System prompt for per-puzzle mode: solve exactly ONE puzzle then call done."""
     return textwrap.dedent(f"""\
-        You are a Computer-Use agent solving ONE CAPTCHA puzzle on the OpenCaptchaWorld benchmark.
+        You are a Computer-Use agent solving ONE CAPTCHA puzzle on the CaptchaArena benchmark.
 
         The browser is open at {url} with a viewport of {width}x{height} pixels.
         You can see the page via screenshots and interact by clicking, typing, scrolling, or dragging.
@@ -712,7 +711,7 @@ def _build_single_puzzle_system_prompt_sft(url: str, width: int, height: int) ->
     embedded in the (no-done) SFT data: exactly 5 tools, the episode ends at the submit
     action, there is no `done`. Pair with SFT_EVAL_TOOLS so train == eval."""
     return (
-        "You are a Computer-Use agent solving exactly one CAPTCHA puzzle on the OpenCaptchaWorld benchmark.\n"
+        "You are a Computer-Use agent solving exactly one CAPTCHA puzzle on the CaptchaArena benchmark.\n"
         "\n"
         f"The page is already open at {url} \n"
         f"in a browser with a fixed {width}x{height} pixel viewport. You perceive the page only through screenshots "

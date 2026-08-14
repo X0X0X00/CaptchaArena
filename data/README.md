@@ -7,17 +7,8 @@ Hub:
 https://huggingface.co/datasets/ZHEN-04/CaptchaArena
 ```
 
-Solved agent trajectories over the `Train` and `Val` puzzles are a separate dataset —
-chain-of-thought rollouts in per-turn SFT format, for training rather than evaluating:
-
-```
-https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories
-```
-
-Both datasets are gated and released under CC BY-NC 4.0 (non-commercial academic
-research), so each needs an approved access request and `hf auth login` before it will
-download. Nothing in this repository reads the trajectories; the benchmark server only
-needs the puzzles.
+The dataset is gated and released under CC BY-NC 4.0 (non-commercial academic research),
+so it needs an approved access request and `hf auth login` before it will download.
 
 ## Download
 

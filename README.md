@@ -6,7 +6,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Puzzles-gated-orange" alt="Puzzles"></a>
-  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
 </p>
 
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
@@ -19,8 +18,6 @@ a whole split can be replayed and verified without ever calling a model.
 
 ## Updates
 
-- **2026-08-11** — Trajectory release: `CaptchaArena-Trajectories`, chain-of-thought
-  computer-use rollouts that solve the Train and Val puzzles, in per-turn SFT format.
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
   gallery and the trajectory viewer.
 - **2026-08-07** — Dataset release: 50,000 puzzles across `Train` / `Val` / `Test`, on the
@@ -151,14 +148,12 @@ The server and the agent both run on Python 3.10+.
 
 ## Getting the data
 
-Two datasets on the Hugging Face Hub — the **puzzles** are what you evaluate on, the
-**trajectories** are what you train on. Both are gated and released under **CC BY-NC 4.0**
-for non-commercial academic research, so each needs an approved access request and a
-logged-in client before it will download.
+Images and ground truth live on the Hugging Face Hub:
 
-### Puzzles — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
+**https://huggingface.co/datasets/ZHEN-04/CaptchaArena**
 
-Images and ground truth for all 20 families.
+The dataset is gated and released under **CC BY-NC 4.0** for non-commercial academic
+research, so it needs an approved access request and a logged-in client to download.
 
 ```bash
 pip install -U huggingface_hub
@@ -175,26 +170,6 @@ hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 Directory names carry their size (`Train/Bingo_2100`, `Test/Bingo_200`), and that
 suffixed name is what the API expects as `puzzle_type`. [data/README.md](data/README.md)
 has the full layout.
-
-### Trajectories — [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)
-
-Solved rollouts for the `Train` and `Val` puzzles: each turn is a screenshot in, a
-`<think>…</think>` chain of thought, and one computer-use action out, until the puzzle is
-submitted. `Test` deliberately has none, so it stays a held-out evaluation set.
-
-Stored per turn — a `T`-step trajectory becomes `T` examples, the `k`-th carrying the
-conversation prefix up to step `k` with the loss on that assistant turn alone. That comes
-to **144,618 training samples** (132,053 train / 12,565 val) over 20 `.jsonl` files per
-split, alongside 169,945 step screenshots (~51 GB).
-
-```bash
-hf auth login     # gated: request access on the dataset page first
-hf download ZHEN-04/CaptchaArena-Trajectories --repo-type dataset \
-  --local-dir CaptchaArena-Trajectories
-```
-
-> Access is granted per request, and the terms are the same as for the puzzles above:
-> non-commercial academic research only.
 
 ## Running it
 
@@ -264,8 +239,8 @@ What is out, and what is still coming.
       screenshot agent, the dataset gallery and the trajectory viewer.
 - [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0).
-- [x] **Trajectories** — chain-of-thought computer-use rollouts over the Train and Val
-      puzzles, in per-turn SFT format, [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories) (gated, CC BY-NC 4.0).
+- [ ] **Training trajectories** — the chain-of-thought computer-use rollouts we fine-tune
+      on, stored one sample per turn.
 - [ ] **Model weights** — the fine-tuned checkpoints.
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn RL setup that
       drives this environment as a live rollout target.
@@ -279,8 +254,8 @@ What is out, and what is still coming.
 
 The code in this repository is MIT — see [LICENSE](LICENSE).
 
-The datasets are not: both the puzzles and the trajectories are released under
-**CC BY-NC 4.0** with gated access, for non-commercial academic research only.
+The dataset is not: it is released under **CC BY-NC 4.0** with gated access, for
+non-commercial academic research only.
 
 ## Credits
 
