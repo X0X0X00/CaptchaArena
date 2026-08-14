@@ -57,7 +57,7 @@ So CaptchaArena keeps the page:
   models, or between the same model on two different days.
 - **Screenshot in, mouse out.** The agent's whole observation is a screenshot, and its
   whole action space is five tools — `screenshot`, `click`, `drag`, `type_text` and
-  `hold`. There is no `done`: submitting ends the episode. It is given no puzzle
+  `hold`. Submitting ends the episode. It is given no puzzle
   metadata, no DOM, and no benchmark API.
 - **Graded by the page.** Correctness comes from `/api/check_answer`, the same endpoint a
   human clicking Submit goes through. There is no separate offline scorer to drift from.
