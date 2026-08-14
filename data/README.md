@@ -7,8 +7,12 @@ Hub:
 https://huggingface.co/datasets/ZHEN-04/CaptchaArena
 ```
 
-The dataset is gated and released under CC BY-NC 4.0 (non-commercial academic research),
-so it needs an approved access request and `hf auth login` before it will download.
+Solved agent trajectories over `Train` / `Val` are a second dataset, for fine-tuning
+rather than evaluating — [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
+Nothing here reads it; the benchmark server only needs the puzzles.
+
+Both are gated and CC BY-NC 4.0 (non-commercial academic research), so each needs an
+approved access request and `hf auth login` before it will download.
 
 ## Download
 

@@ -148,28 +148,21 @@ The server and the agent both run on Python 3.10+.
 
 ## Getting the data
 
-Images and ground truth live on the Hugging Face Hub:
+Both datasets are on the Hugging Face Hub, gated and CC BY-NC 4.0 — request access on the
+dataset page, then `hf auth login`.
 
-**https://huggingface.co/datasets/ZHEN-04/CaptchaArena**
-
-The dataset is gated and released under **CC BY-NC 4.0** for non-commercial academic
-research, so it needs an approved access request and a logged-in client to download.
+- **Puzzles** — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
+  · images and ground truth for `Train` / `Val` / `Test`
+- **Trajectories** — [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)
+  · solved chain-of-thought rollouts over `Train` / `Val`, for fine-tuning
 
 ```bash
-pip install -U huggingface_hub
-hf auth login     # gated: request access on the dataset page first
 hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 ```
 
-| Split | Per type | Total |
-|---|---|---|
-| `Train` | 2,100 | 42,000 |
-| `Val` | 200 | 4,000 |
-| `Test` | 200 | 4,000 |
-
-Directory names carry their size (`Train/Bingo_2100`, `Test/Bingo_200`), and that
-suffixed name is what the API expects as `puzzle_type`. [data/README.md](data/README.md)
-has the full layout.
+One thing the dataset card does not cover: directory names carry their size
+(`Train/Bingo_2100`, `Test/Bingo_200`), and that suffixed name is what the API expects as
+`puzzle_type`. See [data/README.md](data/README.md).
 
 ## Running it
 
@@ -239,8 +232,9 @@ What is out, and what is still coming.
       screenshot agent, the dataset gallery and the trajectory viewer.
 - [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0).
-- [ ] **Training trajectories** — the chain-of-thought computer-use rollouts we fine-tune
-      on, stored one sample per turn.
+- [x] **Training trajectories** — chain-of-thought computer-use rollouts over the Train
+      and Val puzzles, one sample per turn,
+      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
 - [ ] **Model weights** — the fine-tuned checkpoints.
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn RL setup that
       drives this environment as a live rollout target.
@@ -254,7 +248,7 @@ What is out, and what is still coming.
 
 The code in this repository is MIT — see [LICENSE](LICENSE).
 
-The dataset is not: it is released under **CC BY-NC 4.0** with gated access, for
+The datasets are not: both are released under **CC BY-NC 4.0** with gated access, for
 non-commercial academic research only.
 
 ## Credits
