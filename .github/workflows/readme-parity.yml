@@ -1,0 +1,15 @@
+name: README parity
+
+on:
+  push:
+    paths: ['README.md', 'README.zh-CN.md', '.github/check_readme_parity.py']
+  pull_request:
+    paths: ['README.md', 'README.zh-CN.md', '.github/check_readme_parity.py']
+  workflow_dispatch:
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/check_readme_parity.py

@@ -22,6 +22,8 @@ a whole split can be replayed and verified without ever calling a model.
 
 ## Updates
 
+- **2026-08-11** — Trajectory release: chain-of-thought computer-use rollouts that solve
+  the `Train` and `Val` puzzles, one sample per turn, on the Hugging Face Hub.
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
   gallery and the trajectory viewer.
 - **2026-08-07** — Dataset release: 50,000 puzzles across `Train` / `Val` / `Test`, on the

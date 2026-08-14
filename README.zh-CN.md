@@ -20,6 +20,8 @@ CaptchaArena 把 20 类现代 CAPTCHA 以真实网页的形式提供,视口固�
 
 ## 更新
 
+- **2026-08-11** —— 轨迹发布:解出 `Train` / `Val` 题目的带思维链 computer-use 轨迹,按轮拆分为
+  逐条样本,已上 Hugging Face Hub。
 - **2026-08-08** —— 代码发布:基准服务器、截图 agent、数据集画廊、轨迹查看器。
 - **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 共 50,000 道题,已上 Hugging Face Hub。
 
