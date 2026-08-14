@@ -1,7 +1,7 @@
 # Data
 
 The puzzle data is **not** stored in this repository — it is hosted on the Hugging Face
-Hub under CC BY 4.0:
+Hub:
 
 ```
 https://huggingface.co/datasets/ZHEN-04/CaptchaArena
@@ -14,20 +14,22 @@ chain-of-thought rollouts in per-turn SFT format, for training rather than evalu
 https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories
 ```
 
-That one is gated and CC BY-NC 4.0 (non-commercial academic research), so it needs an
-approved access request and `hf auth login` before it will download. Nothing in this
-repository reads it; the benchmark server only needs the puzzles below.
+Both datasets are gated and released under CC BY-NC 4.0 (non-commercial academic
+research), so each needs an approved access request and `hf auth login` before it will
+download. Nothing in this repository reads the trajectories; the benchmark server only
+needs the puzzles.
 
 ## Download
 
 ```bash
 pip install -U huggingface_hub
+hf auth login          # gated: request access on the dataset page first
 
 # everything
-huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
+hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 
 # or a single split
-huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset \
+hf download ZHEN-04/CaptchaArena --repo-type dataset \
   --include "Test/*" --local-dir data
 ```
 

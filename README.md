@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
-  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Puzzles-CaptchaArena-yellow" alt="Puzzles"></a>
+  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Puzzles-gated-orange" alt="Puzzles"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
 </p>
 
@@ -24,7 +24,7 @@ a whole split can be replayed and verified without ever calling a model.
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
   gallery and the trajectory viewer.
 - **2026-08-07** — Dataset release: 50,000 puzzles across `Train` / `Val` / `Test`, on the
-  Hugging Face Hub under CC BY 4.0.
+  Hugging Face Hub.
 
 ## Table of Contents
 
@@ -151,16 +151,19 @@ The server and the agent both run on Python 3.10+.
 
 ## Getting the data
 
-Two datasets on the Hugging Face Hub. The **puzzles** are what you evaluate on; the
-**trajectories** are what you train on.
+Two datasets on the Hugging Face Hub — the **puzzles** are what you evaluate on, the
+**trajectories** are what you train on. Both are gated and released under **CC BY-NC 4.0**
+for non-commercial academic research, so each needs an approved access request and a
+logged-in client before it will download.
 
 ### Puzzles — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
 
-Images and ground truth, CC BY 4.0, open.
+Images and ground truth for all 20 families.
 
 ```bash
 pip install -U huggingface_hub
-huggingface-cli download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
+hf auth login     # gated: request access on the dataset page first
+hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 ```
 
 | Split | Per type | Total |
@@ -190,8 +193,8 @@ hf download ZHEN-04/CaptchaArena-Trajectories --repo-type dataset \
   --local-dir CaptchaArena-Trajectories
 ```
 
-> **Gated, and CC BY-NC 4.0** — non-commercial academic research only, granted per
-> request. The puzzle dataset above has no such restriction.
+> Access is granted per request, and the terms are the same as for the puzzles above:
+> non-commercial academic research only.
 
 ## Running it
 
@@ -260,7 +263,7 @@ What is out, and what is still coming.
 - [x] **Benchmark and agent** — this repository: the server, the 20 puzzle families, the
       screenshot agent, the dataset gallery and the trajectory viewer.
 - [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
-      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) under CC BY 4.0.
+      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0).
 - [x] **Trajectories** — chain-of-thought computer-use rollouts over the Train and Val
       puzzles, in per-turn SFT format, [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories) (gated, CC BY-NC 4.0).
 - [ ] **Model weights** — the fine-tuned checkpoints.
@@ -274,8 +277,10 @@ What is out, and what is still coming.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The datasets carry their own terms: the puzzles under
-CC BY 4.0, the trajectories under CC BY-NC 4.0 with gated access.
+The code in this repository is MIT — see [LICENSE](LICENSE).
+
+The datasets are not: both the puzzles and the trajectories are released under
+**CC BY-NC 4.0** with gated access, for non-commercial academic research only.
 
 ## Credits
 
