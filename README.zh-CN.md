@@ -22,33 +22,23 @@
 
 ![20 类题目,截自真实的基准页面](assets/overview.jpg)
 
-CaptchaArena 是一个面向 computer-use agent 的训练数据集和实时环境,围绕 20 类现代 CAPTCHA
-构建,每道题都以真实网页的形式提供,视口固定 1280×1080。Agent 能拿到的只有截图,靠移动鼠标和
-打字作答,由页面自己的校验逻辑判定对错。
+这个仓库是 CaptchaArena 的代码部分:把 20 类 CAPTCHA 渲染成真实网页(视口固定 1280×1080)并负责
+判分的 Flask 服务器、只靠截图作答的 computer-use agent、在实时页面上浏览数据集的画廊,以及查看
+agent 运行与轨迹的界面。
 
-本次发布包含三部分:
-
-- **50,000 道题**,分布在 `Train` / `Val` / `Test` 三个划分,覆盖 20 类题型和五种交互模式:
-  单次点击、多次点击、箭头翻页、实时操作和文本输入。每道题都带一份可执行的参考解法,并且已经
-  在真实浏览器中重放过、被页面的校验器接受,因此整个划分不调用任何模型就能完成检查。
-- **46,000 条带推理标注的轨迹**,逐步解出 `Train` 和 `Val` 的题目,按轮拆分为逐条训练样本,
-  用于监督微调。
-- **CaptchaAgent**,一个覆盖全部 20 类题型的 Qwen3.5-9B 单一策略,先做 SFT,再以实时校验器
-  为奖励做 GRPO。它在 `Test` 上的 Pass@1 达到 71.7,基座模型为 11.4;人类为 94.1。
-  见[实验结果](#实验结果)。
+题目和带推理标注的轨迹都在 Hugging Face Hub 上(见[获取数据](#获取数据))。数据集设计、
+CaptchaAgent 和全部实验结果见论文(见[引用](#引用))。
 
 ## 更新
 
-- **2026-08-11** —— 轨迹发布:解出 `Train` / `Val` 题目的带思维链 computer-use 轨迹,按轮拆分为
-  逐条样本,已上 Hugging Face Hub。
+- **2026-08-11** —— 轨迹发布:`Train` / `Val` 上带推理标注的轨迹,已上 Hugging Face Hub。
 - **2026-08-08** —— 代码发布:基准服务器、截图 agent、数据集画廊、轨迹查看器。
-- **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 共 50,000 道题,已上 Hugging Face Hub。
+- **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 三个划分的题目,已上 Hugging Face Hub。
 
 ## 目录
 
 - [更新](#更新)
 - [标准答案](#标准答案)
-- [实验结果](#实验结果)
 - [仓库结构](#仓库结构)
 - [安装](#安装)
 - [获取数据](#获取数据)
@@ -65,8 +55,10 @@ CaptchaArena 是一个面向 computer-use agent 的训练数据集和实时环�
 每个题目目录里有两份文件:
 
 - `ground_truth.json` —— 原始形式的答案(索引、坐标、文本),以及判分时用的 `tolerance`。目标
-  形状不规则时,条目指向一张二值掩码而不是一个点,点击落在白色像素上即为正确。
-- `ground_truth_cu.json` —— 同一个答案,写成 agent 动作序列:
+  形状不规则的题型改为给出 `mask_path`,指向一张二值掩码,路径相对题目目录:`Geometry_Click`
+  和 `Pick_Area` 放在 `answer.valid_area` 下,`Misleading_Click` 放在顶层。白色(>127)标出
+  目标;`Misleading_Click` 则相反,白色标出要避开的角色。
+- `ground_truth_cu.json` —— 同一个答案,写成 agent 动作序列(`answer_cu`):
 
 ```jsonc
 "answer_cu": [
@@ -75,35 +67,19 @@ CaptchaArena 是一个面向 computer-use agent 的训练数据集和实时环�
 ]
 ```
 
-第二种形式是**可执行的**,这正是关键。内置的 `mock` provider 会驱动浏览器把 `answer_cu` 走一遍
-并提交给真实判分器,于是一个划分可以自证:凡是达不到 100%,问题就出在数据上,不在模型上。我们
-把它当作每次重新生成划分后的发布闸门。
+`action` 取 `click`、`drag`、`type_text`、`hold` 之一,`arguments` 与 agent 工具的参数相同
+(`x`/`y`;`start_x`、`start_y`、`end_x`、`end_y`;`text`;可选的 `duration_ms`)。`Bingo` 和
+箭头翻页类题型的 `answer_cu` 是一个"备选序列列表"而不是单个序列,重放时取第一个。
+`Geometry_Click`、`Pick_Area`、`Misleading_Click`、`Hold_Button` 由页面自动提交,所以它们的
+序列末尾没有提交点击。
 
-空间类答案统一以**图像原始像素**存储,原点在左上角。前端会把点击换算回该坐标系,所以无论图片以
-什么尺寸显示,存下来的答案都保持有效。
+`answer_cu` 就是 `mock` provider 重放并提交给真实判分器的内容,见
+[第 3 步](#3-用-mock-provider-检查数据)。完好的划分应得到 100%。
 
-## 实验结果
-
-论文训练了 **CaptchaAgent**:一个覆盖全部 20 类题型的 Qwen3.5-9B 单一策略,并在 `Test` 划分上
-用与其他所有模型完全相同的"输入截图、输出鼠标动作"循环进行评测。Pass@1,单位为百分比:
-
-| 模型 | `Test` 上的 Pass@1 |
-|---|---|
-| Qwen3.5-9B,基座 | 11.4 |
-| CaptchaAgent,SFT 之后 | 70.5 |
-| CaptchaAgent,SFT + GRPO 之后 | **71.7** |
-| 评测中最强的开源 GUI agent | 35.2 |
-| 评测中最强的闭源模型 | 69.2 |
-| 人类 | 94.1 |
-
-GRPO 阶段唯一的奖励就是页面的校验器:没有奖励模型,也没有人工标注。提升还能迁移到策略从未
-训练过的基准上:[Open CaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) 从 47.2 到
-51.0,Halligan 从 13.6 到 20.0。逐类错误分析表明,剩余的失败集中在三处:agent 没有提交、
-grounding 到了错误的像素、或者一个本来正确的计划执行得不稳定。
-
-SFT 数据就是上述轨迹数据集:`Train` 和 `Val` 题目经过验证的截图—动作轨迹,由教师模型补上逐步
-推理,再由跨家族的 VLM 评审从与动作一致、无事后信息、果断三方面筛查,不合格的按评审反馈重新
-生成,最后再由更强的模型复核一遍。各阶段所用模型见数据集卡片。
+这里有两套坐标系。`ground_truth.json` 里的目标和掩码是**图像原始像素**,原点左上;页面会把
+图像上的点击换算回该坐标系再判分。上面这种工具调用形式的 `answer_cu` 则是固定 1280×1080
+页面的绝对像素,原样执行。`answer_cu_kind` 为 `single_xy`、`multi_xy`、`multi_swap` 或
+`drag` 的旧格式条目是图像原始像素,mock 重放会在运行时换算。
 
 ## 仓库结构
 
@@ -130,6 +106,15 @@ playwright install chromium
 
 服务器和 agent 都需要 Python 3.10+。
 
+服务器也可以用自带的 `Dockerfile` 跑:镜像里有代码和 Chromium,数据集需要挂载到 `/app/data`:
+
+```bash
+docker build -t captcha-arena .
+docker run -p 7860:7860 -v "$PWD/data:/app/data" captcha-arena    # serves data/Test
+```
+
+加 `-e CAPTCHA_DATA_DIRS=data/Val` 可以换成别的划分。
+
 ## 获取数据
 
 两个数据集都在 Hugging Face Hub 上,均为 gated + CC BY-NC 4.0 —— 先到数据集页面申请访问权限,
@@ -144,8 +129,8 @@ playwright install chromium
 hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 ```
 
-有一点数据集卡片上没写:目录名自带数量后缀(`Train/Bingo_2100`、`Test/Bingo_200`),而 API 要的
-`puzzle_type` 就是这个带后缀的名字。详见 [data/README.md](data/README.md)。
+有一点数据集卡片上没说:API 要的 `puzzle_type` 就是带数量后缀的目录名(`Train/Bingo_2100`、
+`Test/Bingo_200`),而不是 `Bingo`。详见 [data/README.md](data/README.md)。
 
 ## 运行
 
@@ -170,13 +155,24 @@ python -m agent_frameworks.computeruse_cli \
   --provider openai --model <model> \
   --openai-base-url <endpoint> --openai-api-key <key> \
   --url http://127.0.0.1:7860 \
-  --limit 200 --max-steps 30 --headless \
+  --per-puzzle --limit 0 --max-steps 15 --headless \
   --output data/Output/<provider>/<model>
 ```
 
 `--provider` 可选 `anthropic`、`google`、`mock` 或 `openai` —— 最后一个指任何讲 OpenAI
 chat-completions 协议的端点,所以用 vLLM 或 SGLang 本地部署的 ckpt 和托管 API 用法完全一样。
-每道题都会留下 `metafile.json`、`summary.json`、`trajectory.jsonl` 和一个 `screenshots/` 目录。
+`anthropic` 和 `google` 从环境变量读 `ANTHROPIC_API_KEY` 和 `GOOGLE_API_KEY`;其余可调项见
+`.env.example`(代码不会加载 `.env`,需要什么自己 export)。
+
+`--per-puzzle` 会把服务器列出的每道题都跑一遍,每道题一个全新的浏览器上下文;`--limit 0`
+表示全部,`--max-steps 15` 是论文使用的步数上限。用同一个 `--output` 重跑会跳过已经有
+`summary.json` 的题目;`--shard i/N` 把题目列表切给 N 个进程写同一个 `--output`,
+`--rollouts N` 把每道题跑 N 次,写到 `rollout_<n>/`。
+
+用 `openai` 或 `mock` 时,每道题写到 `<output>/<type>/<Type>_<id>/` —— `metafile.json`、
+`summary.json`、`trajectory.jsonl` 和一个 `screenshots/` 目录 —— 整轮结果写到
+`<output>/run_summary.json`。`anthropic` 和 `google` 两条循环只打印结果,不往 `--output`
+下写任何文件。
 
 ### 3. 用 mock provider 检查数据
 
@@ -187,8 +183,27 @@ python -m agent_frameworks.computeruse_cli --provider mock \
   --mock-gt-dir data/Test --output /tmp/mockrun --headless
 ```
 
-全程不涉及模型,只是把记录好的动作在浏览器里重放一遍。要确认刚下载的数据、某次代码改动或重新
-生成的划分是否完好,这是最快的办法。
+全程不涉及模型,只是把记录好的动作在浏览器里重放一遍。要重放整个划分,去掉
+`--puzzle-type`/`--puzzle-id`,加上 `--per-puzzle --limit 0`;`<output>/run_summary.json`
+里的 `accuracy` 应当是 `100.0`:
+
+```bash
+python -m agent_frameworks.computeruse_cli --provider mock \
+  --url http://127.0.0.1:7860 --per-puzzle --limit 0 \
+  --mock-gt-dir data/Test --output /tmp/mockrun --headless
+```
+
+### 4. 查看运行结果
+
+```bash
+cd web && npm install
+VITE_CAPTCHA_SERVER_URL=http://127.0.0.1:7860 npm run dev    # http://127.0.0.1:5173
+```
+
+需要 Node.js。**Output Runs** 列出 `data/Output/<provider>/<model>/` 下的全部运行(即第 2 步
+的 `--output`;可用 `CAPTCHA_RUNS_ROOT` 改),可逐步查看每条轨迹。**Dataset** 在实时页面上浏览
+`data/` 下的各个划分(`CAPTCHA_DATA_ROOT`),页面由第 1 步的服务器提供;不设
+`VITE_CAPTCHA_SERVER_URL` 时它会到 47860 端口找这个服务器。
 
 ## 浏览数据集
 
@@ -201,8 +216,9 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 
 ![数据集画廊](assets/gallery.jpg)
 
-点缩略图打开的**不是图片**,而是那道题的**实时页面**,旁边并排显示标准答案 —— 你可以在与 agent
-完全相同的条件下亲自试一遍。
+点缩略图会打开那道题的实时基准页面,旁边并排显示标准答案;*Raw image* 开关可以切换成只看原图。
+实时页面是从 `GALLERY_CAPTCHA_URL` 反向代理来的,所以第 1 步的服务器必须在跑;它到
+`CAPTCHA_DATASET_ROOT/<split>/`(默认 `data`)下找题目,与 `CAPTCHA_DATA_DIRS` 无关。
 
 ![一道题的实时页面,旁边是它的标准答案](assets/gallery_live.jpg)
 
@@ -211,17 +227,16 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 已经放出来的,和还没放的。
 
 - [x] **基准与 agent** —— 本仓库:服务器、20 类题目、截图 agent、数据集画廊、轨迹查看器。
-- [x] **数据集** —— `Train` / `Val` / `Test`,两种标准答案格式,
-      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)(gated,CC BY-NC 4.0;
-      访问申请在论文上 arXiv 之后审核)。
-- [x] **训练轨迹** —— `Train` / `Val` 上的 46,000 条带思维链 computer-use 轨迹,按轮拆分为
-      逐条样本,[已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
+- [x] **数据集** —— `Train` / `Val` / `Test` 题目及两份标准答案文件,
+      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)。
+- [x] **训练轨迹** —— `Train` / `Val` 上带推理标注的轨迹,每题一条,
+      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
 - [ ] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt。
 - [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 GRPO 配置
-      (DeepSpeed ZeRO-3、Liger FLCE、分布式 checkpoint)。
-- [ ] **题目生成器** —— 各类题目的渲染脚本,供需要比现成划分更多数据、或想加新题型的人使用。
-- [ ] **人类基线** —— [实验结果](#实验结果)中 94.1 背后的逐题标注:标注者通过同一个页面做完整个
-      `Test` 划分。
+      (配置见论文附录 K 和 L)。
+- [ ] **题目生成器** —— 各类题目的渲染脚本。
+- [ ] **人类基线数据** —— 两位标注者通过同一个页面做完整个 `Test` 划分的逐题记录
+      (实验页面已随 `app.py` 发布,由 `STUDY_STORE` 开关控制)。
 - [ ] **论文** —— 审稿中。arXiv 预印本放出的同时,数据集也将开放访问。
 
 ## 引用
