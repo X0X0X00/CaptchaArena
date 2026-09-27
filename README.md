@@ -22,23 +22,16 @@
 
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
-CaptchaArena is a training dataset and a live environment for computer-use agents, built
-around 20 families of modern CAPTCHA served as real web pages at a fixed 1280x1080
-viewport. An agent gets screenshots and nothing else; it answers by moving the mouse and
-typing, and the page's own checker decides whether it was right.
+This repository is the code behind CaptchaArena: the Flask server that renders 20
+families of modern CAPTCHA as live web pages at a fixed 1280x1080 viewport and grades
+answers, the screenshot-only computer-use agent that plays them, a gallery for browsing
+the dataset on its live pages, and a viewer for agent runs and trajectories. An agent gets
+screenshots and nothing else; it answers by moving the mouse and typing, and the page's
+own checker decides whether it was right.
 
-The release has three parts:
-
-- **50,000 puzzles** across `Train` / `Val` / `Test`, covering 20 types and five
-  interaction modes: single-click, multi-click, arrow-cycle, real-time and text-entry.
-  Every puzzle carries an executable reference solution that has been replayed in a real
-  browser and accepted by the page's verifier, so a whole split can be checked without
-  ever calling a model.
-- **46,000 reasoning-annotated trajectories** that solve the `Train` and `Val` puzzles
-  step by step, one training sample per turn, for supervised fine-tuning.
-- **CaptchaAgent**, a single Qwen3.5-9B policy for all 20 types, trained with SFT and then
-  GRPO against the live verifier. It reaches 71.7 Pass@1 on `Test`, up from 11.4 for the
-  base model; humans reach 94.1. See [Results](#results).
+The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
+[Getting the data](#getting-the-data)). The dataset design, CaptchaAgent and all results
+are in the paper (see [Citation](#citation)).
 
 ## Updates
 
@@ -53,7 +46,6 @@ The release has three parts:
 
 - [Updates](#updates)
 - [Ground truth](#ground-truth)
-- [Results](#results)
 - [Repository layout](#repository-layout)
 - [Setup](#setup)
 - [Getting the data](#getting-the-data)
@@ -89,34 +81,6 @@ publishing any regenerated split.
 Spatial answers are stored in **image-natural pixels**, origin top-left. The frontend
 scale-corrects clicks back into that frame, so the stored answer stays valid however the
 image is displayed.
-
-## Results
-
-The paper trains **CaptchaAgent**, one Qwen3.5-9B policy for all 20 puzzle types, and
-scores it on the `Test` split through the same screenshot-in, mouse-out loop as every
-other model. Pass@1, in percent:
-
-| Model | Pass@1 on `Test` |
-|---|---|
-| Qwen3.5-9B, base | 11.4 |
-| CaptchaAgent, after SFT | 70.5 |
-| CaptchaAgent, after SFT and GRPO | **71.7** |
-| Strongest open-weight GUI agent evaluated | 35.2 |
-| Strongest closed-source model evaluated | 69.2 |
-| Human | 94.1 |
-
-The GRPO stage uses the page's verifier as its only reward: no reward model and no human
-labels. The gain carries over to benchmarks the policy never trained on, from 47.2 to 51.0
-on [Open CaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) and from 13.6 to
-20.0 on Halligan. Per-type error analysis puts the remaining failures in three places: the
-agent does not submit, it grounds the wrong pixel, or it executes an otherwise correct
-plan unstably.
-
-The SFT data is the trajectory dataset: the verified screenshot-and-action rollouts of the
-`Train` and `Val` puzzles, annotated with step-by-step reasoning by a teacher model,
-screened by a cross-family VLM judge for consistency with the action, absence of hindsight
-and decisiveness, regenerated on judge feedback, and verified once more by a stronger
-model. The dataset card lists the models used at each stage.
 
 ## Repository layout
 
@@ -240,8 +204,8 @@ What is out, and what is still coming.
       distributed checkpointing).
 - [ ] **Puzzle generators** — the scripts that render each family, for anyone who wants
       more data than the shipped splits, or a new puzzle type.
-- [ ] **Human baseline** — the per-puzzle annotations behind the 94.1 in
-      [Results](#results): annotators solving the whole `Test` split through this same page.
+- [ ] **Human baseline** — annotators solving the whole `Test` split through this same
+      page, so agent scores have something to be measured against.
 - [ ] **Paper** — under review. The arXiv preprint will also open dataset access.
 
 ## Citation
