@@ -1,11 +1,19 @@
 # CaptchaArena
 
-**面向 computer-use agent 的交互式 CAPTCHA 基准。**
+**A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs**
+
+<p align="center">
+  <a href="https://x0x0x00.github.io/">Zhenhao Zhang</a><sup>*</sup>, Zhaoyu Fan, Haohan Ying, Jingwen Hu, Hancen Fan, Junhao Zhou, Zitian Chen, <a href="https://ffmpbgrnn.github.io/">Linchao Zhu</a><sup>†</sup><br>
+  浙江大学计算机科学与技术学院<br>
+  <sup>*</sup>项目负责人 &nbsp;·&nbsp; <sup>†</sup>通讯作者
+</p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
+  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
+  <a href="https://x0x0x00.github.io/"><img src="https://img.shields.io/badge/Paper-under%20review-lightgrey" alt="Paper"></a>
 </p>
 
 <p align="center">
@@ -14,9 +22,20 @@
 
 ![20 类题目,截自真实的基准页面](assets/overview.jpg)
 
-CaptchaArena 把 20 类现代 CAPTCHA 以真实网页的形式提供,视口固定 1280×1080。Agent 能拿到的
-只有截图,靠移动鼠标和打字作答,由页面自己的校验逻辑判定对错。`Train` / `Val` / `Test` 三个
-划分共 50,000 道题,每道都带一份可直接执行的解法,因此整个划分不调用任何模型就能重放并验证。
+CaptchaArena 是一个面向 computer-use agent 的训练数据集和实时环境,围绕 20 类现代 CAPTCHA
+构建,每道题都以真实网页的形式提供,视口固定 1280×1080。Agent 能拿到的只有截图,靠移动鼠标和
+打字作答,由页面自己的校验逻辑判定对错。
+
+本次发布包含三部分:
+
+- **50,000 道题**,分布在 `Train` / `Val` / `Test` 三个划分,覆盖 20 类题型和五种交互模式:
+  单次点击、多次点击、箭头翻页、实时操作和文本输入。每道题都带一份可执行的参考解法,并且已经
+  在真实浏览器中重放过、被页面的校验器接受,因此整个划分不调用任何模型就能完成检查。
+- **46,000 条带推理标注的轨迹**,逐步解出 `Train` 和 `Val` 的题目,按轮拆分为逐条训练样本,
+  用于监督微调。
+- **CaptchaAgent**,一个覆盖全部 20 类题型的 Qwen3.5-9B 单一策略,先做 SFT,再以实时校验器
+  为奖励做 GRPO。它在 `Test` 上的 Pass@1 达到 71.7,基座模型为 11.4;人类为 94.1。
+  见[实验结果](#实验结果)。
 
 ## 更新
 
@@ -31,14 +50,17 @@ CaptchaArena 把 20 类现代 CAPTCHA 以真实网页的形式提供,视口固�
 - [为什么用真实页面](#为什么用真实页面)
 - [20 类题目](#20-类题目)
 - [标准答案](#标准答案)
+- [实验结果](#实验结果)
 - [仓库结构](#仓库结构)
 - [安装](#安装)
 - [获取数据](#获取数据)
 - [运行](#运行)
 - [浏览数据集](#浏览数据集)
 - [发布状态](#发布状态)
+- [引用](#引用)
 - [许可](#许可)
 - [致谢](#致谢)
+- [联系方式](#联系方式)
 
 ## 为什么用真实页面
 
@@ -54,7 +76,8 @@ CAPTCHA 不是一个打标签问题。真正有意思的那些,光看是答不�
   `screenshot`、`click`、`drag`、`type_text`、`hold`。提交即结束。它拿不到任何
   题目元数据、拿不到 DOM、也没有任何基准 API。
 - **由页面判分。** 对错来自 `/api/check_answer`,和真人点 Submit 走的是同一个接口。不存在另一套
-  离线判分器,也就不会和线上逻辑漂移。
+  离线判分器,也就不会和线上逻辑漂移。形状不规则的目标按像素掩码判分,而不是"一个点加一个
+  半径",所以"点击虚线圈出的最大区域"是对着形状本身来判的。
 - **天然多步。** 参考解法的长度从 1 步到 22 步。20 类里有 17 类最多 6 步;`Unusual_Detection`
   和 `Rotation_Match` 分别到 7 步和 8 步;`Patch_Select` 是长尾,中位数 8、90 分位 12。因此
   分数反映的是感知、grounding **以及**顺序,而不是一次性猜测。
@@ -90,11 +113,15 @@ CAPTCHA 不是一个打标签问题。真正有意思的那些,光看是答不�
 其中 7 类共用同一个箭头翻页控件:一个左键、一个右键,在候选图之间翻。它们长得像、操作也一样,
 但底下要做的判断各不相同 —— 数飞镖、对旋转角、跟踪路径 —— 这使它们成为一组有用的受控对照。
 
+论文把这 20 类归为五种交互模式:单次点击、多次点击、箭头翻页、实时操作(按住按钮直到加载完成)
+和文本输入。
+
 ## 标准答案
 
 每个题目目录里有两份文件:
 
-- `ground_truth.json` —— 原始形式的答案(索引、坐标、文本),以及判分时用的 `tolerance`。
+- `ground_truth.json` —— 原始形式的答案(索引、坐标、文本),以及判分时用的 `tolerance`。目标
+  形状不规则时,条目指向一张二值掩码而不是一个点,点击落在白色像素上即为正确。
 - `ground_truth_cu.json` —— 同一个答案,写成 agent 动作序列:
 
 ```jsonc
@@ -110,6 +137,29 @@ CAPTCHA 不是一个打标签问题。真正有意思的那些,光看是答不�
 
 空间类答案统一以**图像原始像素**存储,原点在左上角。前端会把点击换算回该坐标系,所以无论图片以
 什么尺寸显示,存下来的答案都保持有效。
+
+## 实验结果
+
+论文训练了 **CaptchaAgent**:一个覆盖全部 20 类题型的 Qwen3.5-9B 单一策略,并在 `Test` 划分上
+用与其他所有模型完全相同的"输入截图、输出鼠标动作"循环进行评测。Pass@1,单位为百分比:
+
+| 模型 | `Test` 上的 Pass@1 |
+|---|---|
+| Qwen3.5-9B,基座 | 11.4 |
+| CaptchaAgent,SFT 之后 | 70.5 |
+| CaptchaAgent,SFT + GRPO 之后 | **71.7** |
+| 评测中最强的开源 GUI agent | 35.2 |
+| 评测中最强的闭源模型 | 69.2 |
+| 人类 | 94.1 |
+
+GRPO 阶段唯一的奖励就是页面的校验器:没有奖励模型,也没有人工标注。提升还能迁移到策略从未
+训练过的基准上:[Open CaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) 从 47.2 到
+51.0,Halligan 从 13.6 到 20.0。逐类错误分析表明,剩余的失败集中在三处:agent 没有提交、
+grounding 到了错误的像素、或者一个本来正确的计划执行得不稳定。
+
+SFT 数据就是上述轨迹数据集:`Train` 和 `Val` 题目经过验证的截图—动作轨迹,由教师模型补上逐步
+推理,再由跨家族的 VLM 评审从与动作一致、无事后信息、果断三方面筛查,不合格的按评审反馈重新
+生成,最后再由更强的模型复核一遍。各阶段所用模型见数据集卡片。
 
 ## 仓库结构
 
@@ -139,7 +189,7 @@ playwright install chromium
 ## 获取数据
 
 两个数据集都在 Hugging Face Hub 上,均为 gated + CC BY-NC 4.0 —— 先到数据集页面申请访问权限,
-然后 `hf auth login`。
+然后 `hf auth login`。申请会在论文上 arXiv 之后统一审核;现在提交也可以,会先排在队列里。
 
 - **题目** —— [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · `Train` / `Val` / `Test` 的图片与标准答案
@@ -218,14 +268,30 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 
 - [x] **基准与 agent** —— 本仓库:服务器、20 类题目、截图 agent、数据集画廊、轨迹查看器。
 - [x] **数据集** —— `Train` / `Val` / `Test`,两种标准答案格式,
-      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)(gated,CC BY-NC 4.0)。
-- [x] **训练轨迹** —— `Train` / `Val` 上的带思维链 computer-use 轨迹,按轮拆分为逐条样本,
-      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
-- [ ] **模型权重** —— 微调后的 ckpt。
-- [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 RL 配置。
+      [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)(gated,CC BY-NC 4.0;
+      访问申请在论文上 arXiv 之后审核)。
+- [x] **训练轨迹** —— `Train` / `Val` 上的 46,000 条带思维链 computer-use 轨迹,按轮拆分为
+      逐条样本,[已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
+- [ ] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt。
+- [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 GRPO 配置
+      (DeepSpeed ZeRO-3、Liger FLCE、分布式 checkpoint)。
 - [ ] **题目生成器** —— 各类题目的渲染脚本,供需要比现成划分更多数据、或想加新题型的人使用。
-- [ ] **人类基线** —— 标注者通过同一个页面做完整个 `Test` 划分,好让 agent 的分数有参照系。
-- [ ] **论文**,以及与之配套的基线数字。
+- [ ] **人类基线** —— [实验结果](#实验结果)中 94.1 背后的逐题标注:标注者通过同一个页面做完整个
+      `Test` 划分。
+- [ ] **论文** —— 审稿中。arXiv 预印本放出的同时,数据集也将开放访问。
+
+## 引用
+
+论文正在审稿。预印本放出之前,请按如下方式引用:
+
+```bibtex
+@misc{zhang2026captchaarena,
+  title  = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
+  author = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
+  year   = {2026},
+  note   = {Under review}
+}
+```
 
 ## 许可
 
@@ -238,3 +304,10 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 `app.py`、页面模板和前端脚本最初源自
 [OpenCaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld),按其 MIT 许可在此再分发。
 生成器、随仓库发布的全部题目数据、computer-use agent、画廊和轨迹查看器均为本项目所写。
+
+## 联系方式
+
+关于基准、数据或论文的问题,欢迎开 issue,或发邮件给张臻昊(Zhenhao Zhang,项目负责人,现于哥伦比亚大学):
+zz3530@columbia.edu。个人主页:[x0x0x00.github.io](https://x0x0x00.github.io/) ·
+[Google Scholar](https://scholar.google.com/citations?user=yR55AfsAAAAJ) ·
+[GitHub](https://github.com/X0X0X00)。
