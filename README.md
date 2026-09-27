@@ -3,8 +3,8 @@
 **A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs**
 
 <p align="center">
-  <a href="https://x0x0x00.github.io/">Zhenhao Zhang</a><sup>*</sup>, Zhaoyu Fan, Haohan Ying, Jingwen Hu, Hancen Fan, Junhao Zhou, Zitian Chen, <a href="https://ffmpbgrnn.github.io/">Linchao Zhu</a><sup>†</sup><br>
-  College of Computer Science and Technology, Zhejiang University<br>
+  <a href="https://x0x0x00.github.io/">Zhenhao Zhang</a><sup>1,2*</sup>, Zhaoyu Fan<sup>1</sup>, Haohan Ying<sup>1</sup>, Jingwen Hu<sup>1</sup>, Hancen Fan<sup>1</sup>, Junhao Zhou<sup>1</sup>, Zitian Chen<sup>1</sup>, <a href="https://ffmpbgrnn.github.io/">Linchao Zhu</a><sup>1†</sup><br>
+  <sup>1</sup>College of Computer Science and Technology, Zhejiang University &nbsp;·&nbsp; <sup>2</sup>Columbia University<br>
   <sup>*</sup>Project lead &nbsp;·&nbsp; <sup>†</sup>Corresponding author
 </p>
 
