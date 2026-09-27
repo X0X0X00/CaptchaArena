@@ -1,11 +1,19 @@
 # CaptchaArena
 
-**A benchmark for computer-use agents on interactive CAPTCHAs.**
+**A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs**
+
+<p align="center">
+  <a href="https://x0x0x00.github.io/">Zhenhao Zhang</a><sup>*</sup>, Zhaoyu Fan, Haohan Ying, Jingwen Hu, Hancen Fan, Junhao Zhou, Zitian Chen, <a href="https://ffmpbgrnn.github.io/">Linchao Zhu</a><sup>†</sup><br>
+  College of Computer Science and Technology, Zhejiang University<br>
+  <sup>*</sup>Project lead &nbsp;·&nbsp; <sup>†</sup>Corresponding author
+</p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License"></a>
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
+  <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
+  <a href="https://x0x0x00.github.io/"><img src="https://img.shields.io/badge/Paper-under%20review-lightgrey" alt="Paper"></a>
 </p>
 
 <p align="center">
@@ -14,11 +22,23 @@
 
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
-CaptchaArena serves 20 families of modern CAPTCHA as live web pages at a fixed
-1280x1080 viewport. An agent gets screenshots and nothing else; it answers by moving the
-mouse and typing, and the page's own checker decides whether it was right. 50,000 puzzles
-ship across `Train` / `Val` / `Test`, each one carrying a machine-executable solution, so
-a whole split can be replayed and verified without ever calling a model.
+CaptchaArena is a training dataset and a live environment for computer-use agents, built
+around 20 families of modern CAPTCHA served as real web pages at a fixed 1280x1080
+viewport. An agent gets screenshots and nothing else; it answers by moving the mouse and
+typing, and the page's own checker decides whether it was right.
+
+The release has three parts:
+
+- **50,000 puzzles** across `Train` / `Val` / `Test`, covering 20 types and five
+  interaction modes: single-click, multi-click, arrow-cycle, real-time and text-entry.
+  Every puzzle carries an executable reference solution that has been replayed in a real
+  browser and accepted by the page's verifier, so a whole split can be checked without
+  ever calling a model.
+- **46,000 reasoning-annotated trajectories** that solve the `Train` and `Val` puzzles
+  step by step, one training sample per turn, for supervised fine-tuning.
+- **CaptchaAgent**, a single Qwen3.5-9B policy for all 20 types, trained with SFT and then
+  GRPO against the live verifier. It reaches 71.7 Pass@1 on `Test`, up from 11.4 for the
+  base model; humans reach 94.1. See [Results](#results).
 
 ## Updates
 
@@ -35,14 +55,17 @@ a whole split can be replayed and verified without ever calling a model.
 - [Why a live page](#why-a-live-page)
 - [The 20 puzzle types](#the-20-puzzle-types)
 - [Ground truth](#ground-truth)
+- [Results](#results)
 - [Repository layout](#repository-layout)
 - [Setup](#setup)
 - [Getting the data](#getting-the-data)
 - [Running it](#running-it)
 - [Browsing the dataset](#browsing-the-dataset)
 - [Release status](#release-status)
+- [Citation](#citation)
 - [License](#license)
 - [Credits](#credits)
+- [Contact](#contact)
 
 ## Why a live page
 
@@ -63,6 +86,8 @@ So CaptchaArena keeps the page:
   metadata, no DOM, and no benchmark API.
 - **Graded by the page.** Correctness comes from `/api/check_answer`, the same endpoint a
   human clicking Submit goes through. There is no separate offline scorer to drift from.
+  Irregular targets are graded against a pixel mask rather than a point and a radius, so
+  "click the largest outlined area" is judged on the shape itself.
 - **Multi-step by nature.** Reference solutions run from one action to 22. Seventeen of
   the twenty categories need at most six; `Unusual_Detection` and `Rotation_Match` reach
   seven and eight; `Patch_Select` is the long tail, with a median of 8 and a 90th
@@ -103,12 +128,16 @@ through candidate images. They look alike and behave alike, but the underlying d
 count darts, match a rotation, follow a path — is different in each, which makes them a
 useful controlled comparison.
 
+The paper groups the twenty into five interaction modes: single-click, multi-click,
+arrow-cycle, real-time (holding a button until it finishes loading) and text-entry.
+
 ## Ground truth
 
 Every puzzle directory carries two files:
 
 - `ground_truth.json` — the answer in its raw form (indices, coordinates, text) with the
-  `tolerance` used when grading it.
+  `tolerance` used when grading it. Where the target is an irregular shape, the entry
+  points at a binary mask instead, and a click is correct when it lands on a white pixel.
 - `ground_truth_cu.json` — the same answer written out as agent actions:
 
 ```jsonc
@@ -126,6 +155,34 @@ publishing any regenerated split.
 Spatial answers are stored in **image-natural pixels**, origin top-left. The frontend
 scale-corrects clicks back into that frame, so the stored answer stays valid however the
 image is displayed.
+
+## Results
+
+The paper trains **CaptchaAgent**, one Qwen3.5-9B policy for all 20 puzzle types, and
+scores it on the `Test` split through the same screenshot-in, mouse-out loop as every
+other model. Pass@1, in percent:
+
+| Model | Pass@1 on `Test` |
+|---|---|
+| Qwen3.5-9B, base | 11.4 |
+| CaptchaAgent, after SFT on 37.6K per-turn samples | 70.5 |
+| CaptchaAgent, after SFT and GRPO | **71.7** |
+| Strongest open-weight GUI agent evaluated | 35.2 |
+| Strongest closed-source model evaluated | 69.2 |
+| Human | 94.1 |
+
+The GRPO stage uses the page's verifier as its only reward: no reward model and no human
+labels. The gain carries over to benchmarks the policy never trained on, from 47.2 to 51.0
+on [Open CaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) and from 13.6 to
+20.0 on Halligan. Per-type error analysis puts the remaining failures in three places: the
+agent does not submit, it grounds the wrong pixel, or it executes an otherwise correct
+plan unstably.
+
+The SFT data is the trajectory dataset: the verified screenshot-and-action rollouts of the
+`Train` and `Val` puzzles, annotated with step-by-step reasoning by a teacher model,
+screened by a cross-family VLM judge for consistency with the action, absence of hindsight
+and decisiveness, regenerated on judge feedback, and verified once more by a stronger
+model. The dataset card lists the models used at each stage.
 
 ## Repository layout
 
@@ -155,7 +212,8 @@ The server and the agent both run on Python 3.10+.
 ## Getting the data
 
 Both datasets are on the Hugging Face Hub, gated and CC BY-NC 4.0 — request access on the
-dataset page, then `hf auth login`.
+dataset page, then `hf auth login`. Requests are reviewed once the paper is on arXiv; you
+can file one before then and it will wait in the queue.
 
 - **Puzzles** — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · images and ground truth for `Train` / `Val` / `Test`
@@ -237,18 +295,33 @@ What is out, and what is still coming.
 - [x] **Benchmark and agent** — this repository: the server, the 20 puzzle families, the
       screenshot agent, the dataset gallery and the trajectory viewer.
 - [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
-      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0).
-- [x] **Training trajectories** — chain-of-thought computer-use rollouts over the Train
-      and Val puzzles, one sample per turn,
+      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0;
+      access requests are reviewed once the paper is on arXiv).
+- [x] **Training trajectories** — 46,000 chain-of-thought computer-use rollouts over the
+      `Train` and `Val` puzzles, one sample per turn,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
-- [ ] **Model weights** — the fine-tuned checkpoints.
-- [ ] **Training code** — supervised fine-tuning, plus the multi-turn RL setup that
-      drives this environment as a live rollout target.
+- [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO.
+- [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
+      drives this environment as a live rollout target (DeepSpeed ZeRO-3, Liger FLCE,
+      distributed checkpointing).
 - [ ] **Puzzle generators** — the scripts that render each family, for anyone who wants
       more data than the shipped splits, or a new puzzle type.
-- [ ] **Human baseline** — annotators solving the whole `Test` split through this same
-      page, so agent scores have something to be measured against.
-- [ ] **Paper**, and the baseline numbers that belong with it.
+- [ ] **Human baseline** — the per-puzzle annotations behind the 94.1 in
+      [Results](#results): annotators solving the whole `Test` split through this same page.
+- [ ] **Paper** — under review. The arXiv preprint will also open dataset access.
+
+## Citation
+
+The paper is under review. Until the preprint is out, please cite the work as:
+
+```bibtex
+@misc{zhang2026captchaarena,
+  title  = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
+  author = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
+  year   = {2026},
+  note   = {Under review}
+}
+```
 
 ## License
 
@@ -263,3 +336,11 @@ non-commercial academic research only.
 [OpenCaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) and are redistributed
 here under its MIT license. The generators, all shipped puzzle data, the computer-use
 agent, the gallery and the trajectory viewer were written for this project.
+
+## Contact
+
+Questions about the benchmark, the data or the paper: open an issue, or write to
+Zhenhao Zhang (project lead; now at Columbia University) at zz3530@columbia.edu.
+Homepage: [x0x0x00.github.io](https://x0x0x00.github.io/) ·
+[Google Scholar](https://scholar.google.com/citations?user=yR55AfsAAAAJ) ·
+[GitHub](https://github.com/X0X0X00).
