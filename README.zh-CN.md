@@ -146,7 +146,7 @@ CAPTCHA 不是一个打标签问题。真正有意思的那些,光看是答不�
 | 模型 | `Test` 上的 Pass@1 |
 |---|---|
 | Qwen3.5-9B,基座 | 11.4 |
-| CaptchaAgent,在 37.6K 逐轮样本上 SFT 之后 | 70.5 |
+| CaptchaAgent,SFT 之后 | 70.5 |
 | CaptchaAgent,SFT + GRPO 之后 | **71.7** |
 | 评测中最强的开源 GUI agent | 35.2 |
 | 评测中最强的闭源模型 | 69.2 |

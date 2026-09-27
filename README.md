@@ -165,7 +165,7 @@ other model. Pass@1, in percent:
 | Model | Pass@1 on `Test` |
 |---|---|
 | Qwen3.5-9B, base | 11.4 |
-| CaptchaAgent, after SFT on 37.6K per-turn samples | 70.5 |
+| CaptchaAgent, after SFT | 70.5 |
 | CaptchaAgent, after SFT and GRPO | **71.7** |
 | Strongest open-weight GUI agent evaluated | 35.2 |
 | Strongest closed-source model evaluated | 69.2 |
