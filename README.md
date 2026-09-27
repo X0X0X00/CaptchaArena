@@ -22,12 +22,10 @@
 
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
-This repository is the code behind CaptchaArena: the Flask server that renders 20
-families of modern CAPTCHA as live web pages at a fixed 1280x1080 viewport and grades
-answers, the screenshot-only computer-use agent that plays them, a gallery for browsing
-the dataset on its live pages, and a viewer for agent runs and trajectories. An agent gets
-screenshots and nothing else; it answers by moving the mouse and typing, and the page's
-own checker decides whether it was right.
+This repository is the code behind CaptchaArena: the Flask server that renders the 20
+CAPTCHA families as live web pages at a fixed 1280x1080 viewport and grades answers, the
+screenshot-only computer-use agent that plays them, a gallery for browsing the dataset on
+its live pages, and a viewer for agent runs and trajectories.
 
 The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
 [Getting the data](#getting-the-data)). The dataset design, CaptchaAgent and all results
@@ -35,12 +33,12 @@ are in the paper (see [Citation](#citation)).
 
 ## Updates
 
-- **2026-08-11** — Trajectory release: chain-of-thought computer-use rollouts that solve
-  the `Train` and `Val` puzzles, one sample per turn, on the Hugging Face Hub.
+- **2026-08-11** — Trajectory release: the reasoning-annotated trajectories over
+  `Train` / `Val`, on the Hugging Face Hub.
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
   gallery and the trajectory viewer.
-- **2026-08-07** — Dataset release: 50,000 puzzles across `Train` / `Val` / `Test`, on the
-  Hugging Face Hub.
+- **2026-08-07** — Dataset release: the `Train` / `Val` / `Test` puzzles, on the Hugging
+  Face Hub.
 
 ## Table of Contents
 
@@ -62,9 +60,11 @@ are in the paper (see [Citation](#citation)).
 Every puzzle directory carries two files:
 
 - `ground_truth.json` — the answer in its raw form (indices, coordinates, text) with the
-  `tolerance` used when grading it. Where the target is an irregular shape, the entry
-  points at a binary mask instead, and a click is correct when it lands on a white pixel.
-- `ground_truth_cu.json` — the same answer written out as agent actions:
+  `tolerance` used when grading it. Irregular targets carry a `mask_path` to a binary
+  mask instead, relative to the puzzle directory: under `answer.valid_area` for
+  `Geometry_Click` and `Pick_Area`, top-level for `Misleading_Click`. White (>127) marks
+  the target — or, for `Misleading_Click`, the character to avoid.
+- `ground_truth_cu.json` — the same answer written out as agent actions (`answer_cu`):
 
 ```jsonc
 "answer_cu": [
@@ -73,14 +73,22 @@ Every puzzle directory carries two files:
 ]
 ```
 
-The second form is executable, which is the point. The bundled `mock` provider drives a
-browser through `answer_cu` and submits to the real grader, so a split can prove itself:
-anything short of 100% is a defect in the data, not in a model. We use it as a gate before
-publishing any regenerated split.
+`action` is one of `click`, `drag`, `type_text` or `hold`, with the same `arguments` the
+agent's tools take (`x`/`y`; `start_x`, `start_y`, `end_x`, `end_y`; `text`; optional
+`duration_ms`). For `Bingo` and the arrow-cycle types, `answer_cu` is a list of
+alternative sequences rather than one sequence; the replay takes the first.
+`Geometry_Click`, `Pick_Area`, `Misleading_Click` and `Hold_Button` submit on their own,
+so their sequences end without a submit click.
 
-Spatial answers are stored in **image-natural pixels**, origin top-left. The frontend
-scale-corrects clicks back into that frame, so the stored answer stays valid however the
-image is displayed.
+`answer_cu` is what the `mock` provider replays and submits to the real grader — see
+[step 3](#3-check-the-data-with-the-mock-provider). An intact split scores 100%.
+
+Two coordinate frames are in play. `ground_truth.json` targets and masks are in
+**image-natural pixels**, origin top-left; the page maps clicks on the image back into
+that frame before grading. The tool-call form of `answer_cu` shown above is in absolute
+pixels of the fixed 1280x1080 page and is executed as-is. Legacy entries whose
+`answer_cu_kind` is `single_xy`, `multi_xy`, `multi_swap` or `drag` are image-natural,
+and the mock replay converts them at run time.
 
 ## Repository layout
 
@@ -107,6 +115,16 @@ playwright install chromium
 
 The server and the agent both run on Python 3.10+.
 
+The server can also run from the bundled `Dockerfile`: the image holds the code and
+Chromium, and expects the dataset mounted at `/app/data`:
+
+```bash
+docker build -t captcha-arena .
+docker run -p 7860:7860 -v "$PWD/data:/app/data" captcha-arena    # serves data/Test
+```
+
+Pass `-e CAPTCHA_DATA_DIRS=data/Val` to serve another split.
+
 ## Getting the data
 
 Both datasets are on the Hugging Face Hub, gated and CC BY-NC 4.0 — request access on the
@@ -122,9 +140,9 @@ can file one before then and it will wait in the queue.
 hf download ZHEN-04/CaptchaArena --repo-type dataset --local-dir data
 ```
 
-One thing the dataset card does not cover: directory names carry their size
-(`Train/Bingo_2100`, `Test/Bingo_200`), and that suffixed name is what the API expects as
-`puzzle_type`. See [data/README.md](data/README.md).
+One thing the dataset card does not say: the size-suffixed directory name
+(`Train/Bingo_2100`, `Test/Bingo_200`) is exactly what the API expects as `puzzle_type`,
+not `Bingo`. See [data/README.md](data/README.md).
 
 ## Running it
 
@@ -149,14 +167,26 @@ python -m agent_frameworks.computeruse_cli \
   --provider openai --model <model> \
   --openai-base-url <endpoint> --openai-api-key <key> \
   --url http://127.0.0.1:7860 \
-  --limit 200 --max-steps 30 --headless \
+  --per-puzzle --limit 0 --max-steps 15 --headless \
   --output data/Output/<provider>/<model>
 ```
 
 `--provider` takes `anthropic`, `google`, `mock`, or `openai` — the last of which is any
 endpoint speaking the OpenAI chat-completions protocol, so a locally served checkpoint
-under vLLM or SGLang works the same as a hosted API. Every puzzle leaves behind
-`metafile.json`, `summary.json`, `trajectory.jsonl` and a `screenshots/` folder.
+under vLLM or SGLang works the same as a hosted API. `anthropic` and `google` read
+`ANTHROPIC_API_KEY` and `GOOGLE_API_KEY` from the environment; `.env.example` lists the
+other knobs (nothing loads `.env`, so export what you need).
+
+`--per-puzzle` plays every puzzle the server lists, each in a fresh browser context;
+`--limit 0` means all of them, and `--max-steps 15` is the step cap used in the paper.
+Re-running with the same `--output` skips puzzles that already have a `summary.json`;
+`--shard i/N` splits the list across N processes writing to the same `--output`, and
+`--rollouts N` plays each puzzle N times into `rollout_<n>/`.
+
+With `openai` or `mock`, each puzzle is written to `<output>/<type>/<Type>_<id>/` —
+`metafile.json`, `summary.json`, `trajectory.jsonl` and a `screenshots/` folder — and the
+whole run to `<output>/run_summary.json`. The `anthropic` and `google` loops only print
+their result and write nothing under `--output`.
 
 ### 3. Check the data with the mock provider
 
@@ -167,8 +197,28 @@ python -m agent_frameworks.computeruse_cli --provider mock \
   --mock-gt-dir data/Test --output /tmp/mockrun --headless
 ```
 
-No model is involved; the recorded actions are replayed in the browser. It is the quickest
-way to confirm a fresh download, a code change, or a regenerated split is intact.
+No model is involved; the recorded actions are replayed in the browser. To replay a whole
+split, drop `--puzzle-type`/`--puzzle-id` and add `--per-puzzle --limit 0`; `accuracy` in
+`<output>/run_summary.json` should come back as `100.0`:
+
+```bash
+python -m agent_frameworks.computeruse_cli --provider mock \
+  --url http://127.0.0.1:7860 --per-puzzle --limit 0 \
+  --mock-gt-dir data/Test --output /tmp/mockrun --headless
+```
+
+### 4. View the runs
+
+```bash
+cd web && npm install
+VITE_CAPTCHA_SERVER_URL=http://127.0.0.1:7860 npm run dev    # http://127.0.0.1:5173
+```
+
+Needs Node.js. **Output Runs** lists everything under `data/Output/<provider>/<model>/`
+(the `--output` from step 2; override with `CAPTCHA_RUNS_ROOT`) and steps through each
+trajectory. **Dataset** browses the splits under `data/` (`CAPTCHA_DATA_ROOT`) on their
+live pages, served by the server from step 1; without `VITE_CAPTCHA_SERVER_URL` it looks
+for that server on port 47860.
 
 ## Browsing the dataset
 
@@ -181,8 +231,11 @@ Split and type on the left, thumbnails on the right.
 
 ![Dataset gallery](assets/gallery.jpg)
 
-Clicking a thumbnail does not open a picture — it opens that puzzle's *live* page beside
-its ground truth, so you can try it yourself under exactly the conditions an agent faces.
+Clicking a thumbnail opens that puzzle's live benchmark page beside its ground truth; the
+*Raw image* toggle shows the source picture instead. The live page is proxied from
+`GALLERY_CAPTCHA_URL`, so the server from step 1 must be running; it looks the puzzle up
+under `CAPTCHA_DATASET_ROOT/<split>/` (default `data`), independent of
+`CAPTCHA_DATA_DIRS`.
 
 ![A puzzle opened on its live page, with the ground truth beside it](assets/gallery_live.jpg)
 
@@ -192,20 +245,19 @@ What is out, and what is still coming.
 
 - [x] **Benchmark and agent** — this repository: the server, the 20 puzzle families, the
       screenshot agent, the dataset gallery and the trajectory viewer.
-- [x] **Dataset** — `Train` / `Val` / `Test`, both ground-truth formats,
-      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena) (gated, CC BY-NC 4.0;
-      access requests are reviewed once the paper is on arXiv).
-- [x] **Training trajectories** — 46,000 chain-of-thought computer-use rollouts over the
-      `Train` and `Val` puzzles, one sample per turn,
+- [x] **Dataset** — `Train` / `Val` / `Test` puzzles with both ground-truth files,
+      [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena).
+- [x] **Training trajectories** — reasoning-annotated trajectories over `Train` / `Val`,
+      one per puzzle,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
 - [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO.
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
-      drives this environment as a live rollout target (DeepSpeed ZeRO-3, Liger FLCE,
-      distributed checkpointing).
-- [ ] **Puzzle generators** — the scripts that render each family, for anyone who wants
-      more data than the shipped splits, or a new puzzle type.
-- [ ] **Human baseline** — annotators solving the whole `Test` split through this same
-      page, so agent scores have something to be measured against.
+      drives this environment as a live rollout target (configuration: paper, App. K
+      and L).
+- [ ] **Puzzle generators** — the scripts that render each family.
+- [ ] **Human baseline data** — the per-puzzle records of the two annotators who solved
+      the whole `Test` split through this page (the study harness ships in `app.py`,
+      gated on `STUDY_STORE`).
 - [ ] **Paper** — under review. The arXiv preprint will also open dataset access.
 
 ## Citation
