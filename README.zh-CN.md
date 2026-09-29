@@ -15,7 +15,7 @@
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
-  <a href="https://huggingface.co/ZHEN-04/CaptchaAgent"><img src="https://img.shields.io/badge/🤗%20Model-coming%20soon-lightgrey" alt="Model"></a>
+  <a href="https://huggingface.co/ZHEN-04/CaptchaAgent"><img src="https://img.shields.io/badge/🤗%20Model-CaptchaAgent-yellow" alt="Model"></a>
   <a href="https://arxiv.org/abs/2609.31957"><img src="https://img.shields.io/badge/arXiv-2609.31957-b31b1b.svg" alt="arXiv"></a>
 </p>
 
@@ -29,7 +29,7 @@
 判分的 Flask 服务器、只靠截图作答的 computer-use agent、在实时页面上浏览数据集的画廊,以及查看
 agent 运行与轨迹的界面。
 
-数据集在 Hugging Face Hub 上(见[获取数据](#获取数据));CaptchaAgent 权重将发布在
+数据集在 Hugging Face Hub 上(见[获取数据](#获取数据));CaptchaAgent 权重在
 [ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。数据集设计、CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)。
 
 ## 更新
@@ -216,7 +216,7 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
       [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
 - [x] **论文** —— [arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
 - [x] **人类基线** —— 整个 `Test` 划分上分题型的正确率与用时,见论文(附录 G,表 9)。
-- [ ] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt,将发布[在 Hub 上](https://huggingface.co/ZHEN-04/CaptchaAgent)。
+- [x] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt,[已上 Hub](https://huggingface.co/ZHEN-04/CaptchaAgent)。
 - [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 GRPO 配置
       (配置见论文附录 K 和 L)。
 - [ ] **题目生成器** —— 各类题目的渲染脚本。
