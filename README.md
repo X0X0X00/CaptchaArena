@@ -26,7 +26,7 @@
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
 This repository is the code behind CaptchaArena: the Flask server that renders the 20
-CAPTCHA types as live web pages at a fixed 1280x1080 viewport and grades answers, the
+CAPTCHA types as live web pages at a fixed 1280x1080 viewport and gives results, the
 screenshot-only computer-use agent that plays them, a gallery for browsing the dataset on
 its live pages, and a viewer for agent runs and trajectories.
 
