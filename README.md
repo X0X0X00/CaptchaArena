@@ -13,7 +13,7 @@
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
-  <a href="https://x0x0x00.github.io/"><img src="https://img.shields.io/badge/Paper-under%20review-lightgrey" alt="Paper"></a>
+  <a href="https://arxiv.org/abs/2609.31957"><img src="https://img.shields.io/badge/arXiv-2609.31957-b31b1b.svg" alt="arXiv"></a>
 </p>
 
 <p align="center">
@@ -29,10 +29,12 @@ its live pages, and a viewer for agent runs and trajectories.
 
 The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
 [Getting the data](#getting-the-data)). The dataset design, CaptchaAgent and all results
-are in the paper (see [Citation](#citation)).
+are in the [paper](https://arxiv.org/abs/2609.31957).
 
 ## Updates
 
+- **2026-09-25** — Paper released on arXiv:
+  [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
 - **2026-08-11** — Trajectory release: the reasoning-annotated trajectories over
   `Train` / `Val`, on the Hugging Face Hub.
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
@@ -128,8 +130,7 @@ Pass `-e CAPTCHA_DATA_DIRS=data/Val` to serve another split.
 ## Getting the data
 
 Both datasets are on the Hugging Face Hub, gated and CC BY-NC 4.0 — request access on the
-dataset page, then `hf auth login`. Requests are reviewed once the paper is on arXiv; you
-can file one before then and it will wait in the queue.
+dataset page, then `hf auth login`.
 
 - **Puzzles** — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · images and ground truth for `Train` / `Val` / `Test`
@@ -250,6 +251,7 @@ What is out, and what is still coming.
 - [x] **Training trajectories** — reasoning-annotated trajectories over `Train` / `Val`,
       one per puzzle,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
+- [x] **Paper** — [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
 - [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO.
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
       drives this environment as a live rollout target (configuration: paper, App. K
@@ -258,18 +260,17 @@ What is out, and what is still coming.
 - [ ] **Human baseline data** — the per-puzzle records of the two annotators who solved
       the whole `Test` split through this page (the study harness ships in `app.py`,
       gated on `STUDY_STORE`).
-- [ ] **Paper** — under review. The arXiv preprint will also open dataset access.
 
 ## Citation
 
-The paper is under review. Until the preprint is out, please cite the work as:
+If you use CaptchaArena, please cite:
 
 ```bibtex
-@misc{zhang2026captchaarena,
-  title  = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
-  author = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
-  year   = {2026},
-  note   = {Under review}
+@article{zhang2026captchaarena,
+  title   = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
+  author  = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
+  journal = {arXiv preprint arXiv:2609.31957},
+  year    = {2026}
 }
 ```
 
