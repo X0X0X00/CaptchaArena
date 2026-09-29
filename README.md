@@ -31,8 +31,9 @@ screenshot-only computer-use agent that plays them, a gallery for browsing the d
 its live pages, and a viewer for agent runs and trajectories.
 
 The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
-[Getting the data](#getting-the-data)). The dataset design, CaptchaAgent and all results
-are in the [paper](https://arxiv.org/abs/2609.31957).
+[Getting the data](#getting-the-data)); the CaptchaAgent weights will be released at
+[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent). The dataset design, CaptchaAgent and all results are in
+the [paper](https://arxiv.org/abs/2609.31957).
 
 ## Updates
 
