@@ -32,17 +32,6 @@ agent 运行与轨迹的界面。
 数据集在 Hugging Face Hub 上(见[获取数据](#获取数据));CaptchaAgent 权重在
 [ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。数据集设计、CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)。
 
-## 更新
-
-- **2026-09-29** —— 模型发布:CaptchaAgent 权重,[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。
-- **2026-09-25** —— 论文已上 arXiv:[arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
-- **2026-08-11** —— 轨迹发布:`Train` / `Val` 上带推理标注的轨迹,
-  [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
-- **2026-08-08** —— 代码发布:基准服务器、截图 agent、数据集画廊、轨迹查看器,
-  [X0X0X00/CaptchaArena](https://github.com/X0X0X00/CaptchaArena)。
-- **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 三个划分的题目,
-  [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)。
-
 ## 目录
 
 - [更新](#更新)
@@ -56,6 +45,17 @@ agent 运行与轨迹的界面。
 - [引用](#引用)
 - [许可](#许可)
 - [致谢](#致谢)
+
+## 更新
+
+- **2026-09-29** —— 模型发布:CaptchaAgent 权重,[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。
+- **2026-09-25** —— 论文已上 arXiv:[arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
+- **2026-08-11** —— 轨迹发布:`Train` / `Val` 上带推理标注的轨迹,
+  [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
+- **2026-08-08** —— 代码发布:基准服务器、截图 agent、数据集画廊、轨迹查看器,
+  [X0X0X00/CaptchaArena](https://github.com/X0X0X00/CaptchaArena)。
+- **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 三个划分的题目,
+  [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)。
 
 ## 标准答案
 
