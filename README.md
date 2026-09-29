@@ -15,7 +15,7 @@
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
-  <a href="https://huggingface.co/ZHEN-04/CaptchaAgent"><img src="https://img.shields.io/badge/🤗%20Model-coming%20soon-lightgrey" alt="Model"></a>
+  <a href="https://huggingface.co/ZHEN-04/CaptchaAgent"><img src="https://img.shields.io/badge/🤗%20Model-CaptchaAgent-yellow" alt="Model"></a>
   <a href="https://arxiv.org/abs/2609.31957"><img src="https://img.shields.io/badge/arXiv-2609.31957-b31b1b.svg" alt="arXiv"></a>
 </p>
 
@@ -30,9 +30,9 @@ CAPTCHA types as live web pages at a fixed 1280x1080 viewport and grades answers
 screenshot-only computer-use agent that plays them, a gallery for browsing the dataset on
 its live pages, and a viewer for agent runs and trajectories.
 
-The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
-[Getting the data](#getting-the-data)). The dataset design, CaptchaAgent and all results
-are in the [paper](https://arxiv.org/abs/2609.31957).
+The dataset is on the Hugging Face Hub (see [Getting the data](#getting-the-data)); the
+CaptchaAgent weights are at [ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent). The
+dataset design, CaptchaAgent and all results are in the [paper](https://arxiv.org/abs/2609.31957).
 
 ## Updates
 
@@ -231,8 +231,8 @@ What is out, and what is still coming.
 - [x] **Paper** — [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
 - [x] **Human baseline** — per-type accuracy and solve time on the whole `Test` split, in
       the paper (App. G, Table 9).
-- [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO,
-      to be released [on the Hub](https://huggingface.co/ZHEN-04/CaptchaAgent).
+- [x] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO,
+      [on the Hub](https://huggingface.co/ZHEN-04/CaptchaAgent).
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
       drives this environment as a live rollout target (configuration: paper, App. K
       and L).
