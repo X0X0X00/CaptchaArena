@@ -29,9 +29,8 @@
 判分的 Flask 服务器、只靠截图作答的 computer-use agent、在实时页面上浏览数据集的画廊,以及查看
 agent 运行与轨迹的界面。
 
-题目和带推理标注的轨迹都在 Hugging Face Hub 上(见[获取数据](#获取数据));CaptchaAgent 权重将发布在
-[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。数据集设计、
-CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)。
+数据集在 Hugging Face Hub 上(见[获取数据](#获取数据));CaptchaAgent 权重将发布在
+[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent)。数据集设计、CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)。
 
 ## 更新
 

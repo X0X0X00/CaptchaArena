@@ -30,10 +30,9 @@ CAPTCHA types as live web pages at a fixed 1280x1080 viewport and grades answers
 screenshot-only computer-use agent that plays them, a gallery for browsing the dataset on
 its live pages, and a viewer for agent runs and trajectories.
 
-The puzzles and the reasoning-annotated trajectories live on the Hugging Face Hub (see
-[Getting the data](#getting-the-data)); the CaptchaAgent weights will be released at
-[ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent). The dataset design, CaptchaAgent and all results are in
-the [paper](https://arxiv.org/abs/2609.31957).
+The dataset is on the Hugging Face Hub (see [Getting the data](#getting-the-data)); the
+CaptchaAgent weights will be released at [ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent). The
+dataset design, CaptchaAgent and all results are in the [paper](https://arxiv.org/abs/2609.31957).
 
 ## Updates
 
