@@ -15,6 +15,7 @@
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
+  <a href="https://huggingface.co/ZHEN-04/CaptchaAgent"><img src="https://img.shields.io/badge/🤗%20Model-coming%20soon-lightgrey" alt="Model"></a>
   <a href="https://arxiv.org/abs/2609.31957"><img src="https://img.shields.io/badge/arXiv-2609.31957-b31b1b.svg" alt="arXiv"></a>
 </p>
 
@@ -254,14 +255,16 @@ What is out, and what is still coming.
       one per puzzle,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
 - [x] **Paper** — [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
-- [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO.
+- [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO,
+      to be released [on the Hub](https://huggingface.co/ZHEN-04/CaptchaAgent).
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
       drives this environment as a live rollout target (configuration: paper, App. K
       and L).
 - [ ] **Puzzle generators** — the scripts that render each family.
-- [ ] **Human baseline data** — the per-puzzle records of the two annotators who solved
-      the whole `Test` split through this page (the study harness ships in `app.py`,
-      gated on `STUDY_STORE`).
+- [ ] **Human baseline data** — the per-puzzle records of the two annotators who, between
+      them, solved the whole `Test` split (each puzzle once) on the same benchmark page the
+      agents use (paper, App. G). The study harness ships with the server (`/study` in
+      `app.py`, `templates/study_shell.html`), gated on `STUDY_STORE`.
 
 ## Citation
 
@@ -287,8 +290,9 @@ non-commercial academic research only.
 
 `app.py`, the page template and the frontend script began as
 [OpenCaptchaWorld](https://github.com/MetaAgentX/OpenCaptchaWorld) and are redistributed
-here under its MIT license. The generators, all shipped puzzle data, the computer-use
-agent, the gallery and the trajectory viewer were written for this project.
+here under its MIT license. The computer-use agent, the gallery and the trajectory viewer
+were written for this project, as were the puzzle generators (not yet released) and all
+of the puzzle data on the Hub.
 
 ## Contact
 
