@@ -36,14 +36,16 @@ dataset design, CaptchaAgent and all results are in the [paper](https://arxiv.or
 
 ## Updates
 
+- **2026-09-29** — Model release: the CaptchaAgent weights,
+  [ZHEN-04/CaptchaAgent](https://huggingface.co/ZHEN-04/CaptchaAgent).
 - **2026-09-25** — Paper released on arXiv:
   [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
 - **2026-08-11** — Trajectory release: the reasoning-annotated trajectories over
-  `Train` / `Val`, on the Hugging Face Hub.
+  `Train` / `Val`, [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
 - **2026-08-08** — Code release: the benchmark server, the screenshot agent, the dataset
-  gallery and the trajectory viewer.
-- **2026-08-07** — Dataset release: the `Train` / `Val` / `Test` puzzles, on the Hugging
-  Face Hub.
+  gallery and the trajectory viewer, [X0X0X00/CaptchaArena](https://github.com/X0X0X00/CaptchaArena).
+- **2026-08-07** — Dataset release: the `Train` / `Val` / `Test` puzzles,
+  [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena).
 
 ## Table of Contents
 
