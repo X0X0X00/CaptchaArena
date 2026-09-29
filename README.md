@@ -58,7 +58,6 @@ are in the [paper](https://arxiv.org/abs/2609.31957).
 - [Citation](#citation)
 - [License](#license)
 - [Credits](#credits)
-- [Contact](#contact)
 
 ## Ground truth
 
@@ -78,22 +77,8 @@ Every puzzle directory carries two files:
 ]
 ```
 
-`action` is one of `click`, `drag`, `type_text` or `hold`, with the same `arguments` the
-agent's tools take (`x`/`y`; `start_x`, `start_y`, `end_x`, `end_y`; `text`; optional
-`duration_ms`). For `Bingo` and the arrow-cycle types, `answer_cu` is a list of
-alternative sequences rather than one sequence; the replay takes the first.
-`Geometry_Click`, `Pick_Area`, `Misleading_Click` and `Hold_Button` submit on their own,
-so their sequences end without a submit click.
-
 `answer_cu` is what the `mock` provider replays and submits to the real grader — see
 [step 3](#3-check-the-data-with-the-mock-provider). An intact split scores 100%.
-
-Two coordinate frames are in play. `ground_truth.json` targets and masks are in
-**image-natural pixels**, origin top-left; the page maps clicks on the image back into
-that frame before grading. The tool-call form of `answer_cu` shown above is in absolute
-pixels of the fixed 1280x1080 page and is executed as-is. Legacy entries whose
-`answer_cu_kind` is `single_xy`, `multi_xy`, `multi_swap` or `drag` are image-natural,
-and the mock replay converts them at run time.
 
 ## Repository layout
 
@@ -181,16 +166,8 @@ under vLLM or SGLang works the same as a hosted API. `anthropic` and `google` re
 `ANTHROPIC_API_KEY` and `GOOGLE_API_KEY` from the environment; `.env.example` lists the
 other knobs (nothing loads `.env`, so export what you need).
 
-`--per-puzzle` plays every puzzle the server lists, each in a fresh browser context;
-`--limit 0` means all of them, and `--max-steps 15` is the step cap used in the paper.
-Re-running with the same `--output` skips puzzles that already have a `summary.json`;
-`--shard i/N` splits the list across N processes writing to the same `--output`, and
-`--rollouts N` plays each puzzle N times into `rollout_<n>/`.
-
-With `openai` or `mock`, each puzzle is written to `<output>/<type>/<Type>_<id>/` —
-`metafile.json`, `summary.json`, `trajectory.jsonl` and a `screenshots/` folder — and the
-whole run to `<output>/run_summary.json`. The `anthropic` and `google` loops only print
-their result and write nothing under `--output`.
+`--per-puzzle --limit 0` plays every puzzle the server lists, and `--max-steps 15` is the
+step cap used in the paper. Results are written under `--output`.
 
 ### 3. Check the data with the mock provider
 
@@ -235,11 +212,8 @@ Split and type on the left, thumbnails on the right.
 
 ![Dataset gallery](assets/gallery.jpg)
 
-Clicking a thumbnail opens that puzzle's live benchmark page beside its ground truth; the
-*Raw image* toggle shows the source picture instead. The live page is proxied from
-`GALLERY_CAPTCHA_URL`, so the server from step 1 must be running; it looks the puzzle up
-under `CAPTCHA_DATASET_ROOT/<split>/` (default `data`), independent of
-`CAPTCHA_DATA_DIRS`.
+Clicking a thumbnail opens that puzzle's live page beside its ground truth; the server
+from step 1 must be running.
 
 ![A puzzle opened on its live page, with the ground truth beside it](assets/gallery_live.jpg)
 
@@ -255,16 +229,14 @@ What is out, and what is still coming.
       one per puzzle,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories).
 - [x] **Paper** — [arXiv:2609.31957](https://arxiv.org/abs/2609.31957).
+- [x] **Human baseline** — per-type accuracy and solve time on the whole `Test` split, in
+      the paper (App. G, Table 9).
 - [ ] **CaptchaAgent weights** — the Qwen3.5-9B checkpoints after SFT and after GRPO,
       to be released [on the Hub](https://huggingface.co/ZHEN-04/CaptchaAgent).
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
       drives this environment as a live rollout target (configuration: paper, App. K
       and L).
 - [ ] **Puzzle generators** — the scripts that render each family.
-- [ ] **Human baseline data** — the per-puzzle records of the two annotators who, between
-      them, solved the whole `Test` split (each puzzle once) on the same benchmark page the
-      agents use (paper, App. G). The study harness ships with the server (`/study` in
-      `app.py`, `templates/study_shell.html`), gated on `STUDY_STORE`.
 
 ## Citation
 
@@ -294,10 +266,3 @@ here under its MIT license. The computer-use agent, the gallery and the trajecto
 were written for this project, as were the puzzle generators (not yet released) and all
 of the puzzle data on the Hub.
 
-## Contact
-
-Questions about the benchmark, the data or the paper: open an issue, or write to
-Zhenhao Zhang (project lead; now at Columbia University) at zz3530@columbia.edu.
-Homepage: [x0x0x00.github.io](https://x0x0x00.github.io/) ·
-[Google Scholar](https://scholar.google.com/citations?user=yR55AfsAAAAJ) ·
-[GitHub](https://github.com/X0X0X00).

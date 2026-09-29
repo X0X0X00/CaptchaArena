@@ -52,7 +52,6 @@ CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)�
 - [引用](#引用)
 - [许可](#许可)
 - [致谢](#致谢)
-- [联系方式](#联系方式)
 
 ## 标准答案
 
@@ -71,19 +70,8 @@ CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)�
 ]
 ```
 
-`action` 取 `click`、`drag`、`type_text`、`hold` 之一,`arguments` 与 agent 工具的参数相同
-(`x`/`y`;`start_x`、`start_y`、`end_x`、`end_y`;`text`;可选的 `duration_ms`)。`Bingo` 和
-箭头翻页类题型的 `answer_cu` 是一个"备选序列列表"而不是单个序列,重放时取第一个。
-`Geometry_Click`、`Pick_Area`、`Misleading_Click`、`Hold_Button` 由页面自动提交,所以它们的
-序列末尾没有提交点击。
-
 `answer_cu` 就是 `mock` provider 重放并提交给真实判分器的内容,见
 [第 3 步](#3-用-mock-provider-检查数据)。完好的划分应得到 100%。
-
-这里有两套坐标系。`ground_truth.json` 里的目标和掩码是**图像原始像素**,原点左上;页面会把
-图像上的点击换算回该坐标系再判分。上面这种工具调用形式的 `answer_cu` 则是固定 1280×1080
-页面的绝对像素,原样执行。`answer_cu_kind` 为 `single_xy`、`multi_xy`、`multi_swap` 或
-`drag` 的旧格式条目是图像原始像素,mock 重放会在运行时换算。
 
 ## 仓库结构
 
@@ -168,15 +156,8 @@ chat-completions 协议的端点,所以用 vLLM 或 SGLang 本地部署的 ckpt 
 `anthropic` 和 `google` 从环境变量读 `ANTHROPIC_API_KEY` 和 `GOOGLE_API_KEY`;其余可调项见
 `.env.example`(代码不会加载 `.env`,需要什么自己 export)。
 
-`--per-puzzle` 会把服务器列出的每道题都跑一遍,每道题一个全新的浏览器上下文;`--limit 0`
-表示全部,`--max-steps 15` 是论文使用的步数上限。用同一个 `--output` 重跑会跳过已经有
-`summary.json` 的题目;`--shard i/N` 把题目列表切给 N 个进程写同一个 `--output`,
-`--rollouts N` 把每道题跑 N 次,写到 `rollout_<n>/`。
-
-用 `openai` 或 `mock` 时,每道题写到 `<output>/<type>/<Type>_<id>/` —— `metafile.json`、
-`summary.json`、`trajectory.jsonl` 和一个 `screenshots/` 目录 —— 整轮结果写到
-`<output>/run_summary.json`。`anthropic` 和 `google` 两条循环只打印结果,不往 `--output`
-下写任何文件。
+`--per-puzzle --limit 0` 会把服务器列出的每道题都跑一遍,`--max-steps 15` 是论文使用的步数上限。
+结果写到 `--output` 下。
 
 ### 3. 用 mock provider 检查数据
 
@@ -220,9 +201,7 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 
 ![数据集画廊](assets/gallery.jpg)
 
-点缩略图会打开那道题的实时基准页面,旁边并排显示标准答案;*Raw image* 开关可以切换成只看原图。
-实时页面是从 `GALLERY_CAPTCHA_URL` 反向代理来的,所以第 1 步的服务器必须在跑;它到
-`CAPTCHA_DATASET_ROOT/<split>/`(默认 `data`)下找题目,与 `CAPTCHA_DATA_DIRS` 无关。
+点缩略图会打开那道题的实时页面,旁边并排显示标准答案;需要第 1 步的服务器在跑。
 
 ![一道题的实时页面,旁边是它的标准答案](assets/gallery_live.jpg)
 
@@ -236,13 +215,11 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 - [x] **训练轨迹** —— `Train` / `Val` 上带推理标注的轨迹,每题一条,
       [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
 - [x] **论文** —— [arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
+- [x] **人类基线** —— 整个 `Test` 划分上分题型的正确率与用时,见论文(附录 G,表 9)。
 - [ ] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt,将发布[在 Hub 上](https://huggingface.co/ZHEN-04/CaptchaAgent)。
 - [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 GRPO 配置
       (配置见论文附录 K 和 L)。
 - [ ] **题目生成器** —— 各类题目的渲染脚本。
-- [ ] **人类基线数据** —— 两位标注者在与 agent 相同的基准页面上分工做完整个 `Test` 划分、
-      每题只做一次(论文附录 G)的逐题记录。实验页面已随服务器发布(`app.py` 的 `/study`、
-      `templates/study_shell.html`),由 `STUDY_STORE` 开关控制。
 
 ## 引用
 
@@ -270,9 +247,3 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
 computer-use agent、画廊和轨迹查看器均为本项目所写;题目生成器(尚未发布)和 Hub 上的全部题目
 数据同样出自本项目。
 
-## 联系方式
-
-关于基准、数据或论文的问题,欢迎开 issue,或发邮件给张臻昊(Zhenhao Zhang,项目负责人,现于哥伦比亚大学):
-zz3530@columbia.edu。个人主页:[x0x0x00.github.io](https://x0x0x00.github.io/) ·
-[Google Scholar](https://scholar.google.com/citations?user=yR55AfsAAAAJ) ·
-[GitHub](https://github.com/X0X0X00)。
