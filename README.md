@@ -122,7 +122,7 @@ Pass `-e CAPTCHA_DATA_DIRS=data/Val` to serve another split.
 Both datasets are on the Hugging Face Hub, gated and CC BY-NC 4.0 — request access on the
 dataset page, then `hf auth login`.
 
-- **Puzzles** — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
+- **Dataset** — [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · images and ground truth for `Train` / `Val` / `Test`
 - **Trajectories** — [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)
   · solved chain-of-thought rollouts over `Train` / `Val`, for fine-tuning
