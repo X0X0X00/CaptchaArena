@@ -26,7 +26,7 @@
 ![The 20 puzzle types, captured from the live benchmark pages](assets/overview.jpg)
 
 This repository is the code behind CaptchaArena: the Flask server that renders the 20
-CAPTCHA types as live web pages at a fixed 1280x1080 viewport and gives results, the
+CAPTCHA types as live web pages at a fixed 1280x1080 viewport and grades answers, the
 screenshot-only computer-use agent that plays them, a gallery for browsing the dataset on
 its live pages, and a viewer for agent runs and trajectories.
 
@@ -223,7 +223,7 @@ from step 1 must be running.
 
 What is out, and what is still coming.
 
-- [x] **Benchmark and agent** — this repository: the server, the 20 puzzle ies, the
+- [x] **Benchmark and agent** — this repository: the server, the 20 puzzle types, the
       screenshot agent, the dataset gallery and the trajectory viewer.
 - [x] **Dataset** — `Train` / `Val` / `Test` puzzles with both ground-truth files,
       [on the Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena).
@@ -238,7 +238,7 @@ What is out, and what is still coming.
 - [ ] **Training code** — supervised fine-tuning, plus the multi-turn GRPO setup that
       drives this environment as a live rollout target (configuration: paper, App. K
       and L).
-- [ ] **Puzzle generators** — the scripts that render each y.
+- [ ] **Puzzle generators** — the scripts that render each type.
 
 ## Citation
 
