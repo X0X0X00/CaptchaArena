@@ -116,7 +116,7 @@ docker run -p 7860:7860 -v "$PWD/data:/app/data" captcha-arena    # serves data/
 两个数据集都在 Hugging Face Hub 上,均为 gated + CC BY-NC 4.0 —— 先到数据集页面申请访问权限,
 然后 `hf auth login`。
 
-- **题目** —— [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
+- **数据集** —— [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · `Train` / `Val` / `Test` 的图片与标准答案
 - **轨迹** —— [ZHEN-04/CaptchaArena-Trajectories](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)
   · `Train` / `Val` 上已解出的带思维链轨迹,用于微调
