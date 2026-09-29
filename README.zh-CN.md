@@ -13,7 +13,7 @@
   <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena"><img src="https://img.shields.io/badge/🤗%20Bench-gated-orange" alt="Bench"></a>
   <a href="https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories"><img src="https://img.shields.io/badge/🤗%20Trajectories-gated-orange" alt="Trajectories"></a>
-  <a href="https://x0x0x00.github.io/"><img src="https://img.shields.io/badge/Paper-under%20review-lightgrey" alt="Paper"></a>
+  <a href="https://arxiv.org/abs/2609.31957"><img src="https://img.shields.io/badge/arXiv-2609.31957-b31b1b.svg" alt="arXiv"></a>
 </p>
 
 <p align="center">
@@ -27,10 +27,11 @@
 agent 运行与轨迹的界面。
 
 题目和带推理标注的轨迹都在 Hugging Face Hub 上(见[获取数据](#获取数据))。数据集设计、
-CaptchaAgent 和全部实验结果见论文(见[引用](#引用))。
+CaptchaAgent 和全部实验结果见[论文](https://arxiv.org/abs/2609.31957)。
 
 ## 更新
 
+- **2026-09-25** —— 论文已上 arXiv:[arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
 - **2026-08-11** —— 轨迹发布:`Train` / `Val` 上带推理标注的轨迹,已上 Hugging Face Hub。
 - **2026-08-08** —— 代码发布:基准服务器、截图 agent、数据集画廊、轨迹查看器。
 - **2026-08-07** —— 数据集发布:`Train` / `Val` / `Test` 三个划分的题目,已上 Hugging Face Hub。
@@ -118,7 +119,7 @@ docker run -p 7860:7860 -v "$PWD/data:/app/data" captcha-arena    # serves data/
 ## 获取数据
 
 两个数据集都在 Hugging Face Hub 上,均为 gated + CC BY-NC 4.0 —— 先到数据集页面申请访问权限,
-然后 `hf auth login`。申请会在论文上 arXiv 之后统一审核;现在提交也可以,会先排在队列里。
+然后 `hf auth login`。
 
 - **题目** —— [ZHEN-04/CaptchaArena](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)
   · `Train` / `Val` / `Test` 的图片与标准答案
@@ -231,24 +232,24 @@ GALLERY_DATA_ROOT=data GALLERY_CAPTCHA_URL=http://127.0.0.1:7860 \
       [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena)。
 - [x] **训练轨迹** —— `Train` / `Val` 上带推理标注的轨迹,每题一条,
       [已上 Hub](https://huggingface.co/datasets/ZHEN-04/CaptchaArena-Trajectories)。
+- [x] **论文** —— [arXiv:2609.31957](https://arxiv.org/abs/2609.31957)。
 - [ ] **CaptchaAgent 权重** —— SFT 之后与 GRPO 之后的 Qwen3.5-9B ckpt。
 - [ ] **训练代码** —— 监督微调,以及把本环境当作实时 rollout 目标的多轮 GRPO 配置
       (配置见论文附录 K 和 L)。
 - [ ] **题目生成器** —— 各类题目的渲染脚本。
 - [ ] **人类基线数据** —— 两位标注者通过同一个页面做完整个 `Test` 划分的逐题记录
       (实验页面已随 `app.py` 发布,由 `STUDY_STORE` 开关控制)。
-- [ ] **论文** —— 审稿中。arXiv 预印本放出的同时,数据集也将开放访问。
 
 ## 引用
 
-论文正在审稿。预印本放出之前,请按如下方式引用:
+如果用到了 CaptchaArena,请引用:
 
 ```bibtex
-@misc{zhang2026captchaarena,
-  title  = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
-  author = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
-  year   = {2026},
-  note   = {Under review}
+@article{zhang2026captchaarena,
+  title   = {CaptchaArena: A Large-Scale, Fine-Grained Dataset for Training Computer-Use Agents on Interactive CAPTCHAs},
+  author  = {Zhang, Zhenhao and Fan, Zhaoyu and Ying, Haohan and Hu, Jingwen and Fan, Hancen and Zhou, Junhao and Chen, Zitian and Zhu, Linchao},
+  journal = {arXiv preprint arXiv:2609.31957},
+  year    = {2026}
 }
 ```
 
